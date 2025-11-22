@@ -1,92 +1,83 @@
-import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/theme_provider.dart';
-import '../providers/auth_provider.dart';
-import 'package:sky_book/screens/home_screen.dart';
-import 'package:sky_book/screens/shelf_screen.dart';
-import 'package:sky_book/screens/discover_screen.dart';
-import 'package:sky_book/screens/leaderboard_screen.dart';
-import 'package:sky_book/screens/profile_screen.dart';
+import 'package:sky_book/screens/discover/discover_provider.dart';
+import 'package:sky_book/screens/discover/discover_screen.dart';
+import 'package:sky_book/screens/home/home_provider.dart';
+import 'package:sky_book/screens/home/home_screen.dart';
+import 'package:sky_book/screens/leaderboard/leaderboard_provider.dart';
+import 'package:sky_book/screens/leaderboard/leaderboard_screen.dart';
+import 'package:sky_book/screens/profile/profile_provider.dart';
+import 'package:sky_book/screens/profile/profile_screen.dart';
+import 'package:sky_book/screens/shelf/shelf_provider.dart';
+import 'package:sky_book/screens/shelf/shelf_screen.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class AppNavigation extends StatefulWidget {
+  const AppNavigation({super.key});
 
   @override
-  MainPageState createState() => MainPageState();
+  State<AppNavigation> createState() => _AppNavigationState();
 }
 
-class MainPageState extends State<MainPage> {
-  int _selectedIndex = 2;
+class _AppNavigationState extends State<AppNavigation> {
+  int _selectedIndex = 2; // Set home as the default selected index
 
-  final List<Widget> _screens = const [
+  static const List<Widget> _widgetOptions = <Widget>[
     ShelfScreen(),
-    DiscoverScreen(),
-    HomeScreen(),
     LeaderboardScreen(),
+    HomeScreen(),
+    DiscoverScreen(),
     ProfileScreen(),
   ];
 
-  final List<String> _screenTitles = const [
-    'My Shelf',
-    'Discover',
-    'Home',
-    'Leaderboard',
-    'Profile',
-  ];
-
-  NavigationItem _buildButton(String label, IconData icon) {
-    return NavigationItem(label: Text(label), child: Icon(icon));
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final authProvider = Provider.of<AuthProvider>(context);
-    final isDark = themeProvider.isDarkMode;
-
-    return Scaffold(
-      headers: [
-        AppBar(
-          title: Text(_screenTitles[_selectedIndex]),
-          subtitle: authProvider.isAuthenticated
-              ? Text('Welcome, ${authProvider.currentUser!.username}')
-              : const Text('Your reliable reading companion.'),
-          trailing: [
-            GhostButton(
-              density: ButtonDensity.icon,
-              onPressed: () {
-                // TODO: Implement search
-              },
-              child: const Icon(LucideIcons.search),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ShelfProvider()),
+        ChangeNotifierProvider(create: (_) => LeaderboardProvider()),
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => DiscoverProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+      ],
+      child: Scaffold(
+        body: Center(
+          child: _widgetOptions.elementAt(_selectedIndex),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.book),
+              label: 'Shelf',
             ),
-            GhostButton(
-              density: ButtonDensity.icon,
-              onPressed: () => themeProvider.toggleTheme(),
-              child: Icon(isDark ? LucideIcons.sun : LucideIcons.moon),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.leaderboard),
+              label: 'Leaderboard',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Discover',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
             ),
           ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.amber[800],
+          unselectedItemColor: Colors.grey,
+          onTap: _onItemTapped,
         ),
-        const Divider(),
-      ],
-      footers: [
-        const Divider(),
-        NavigationBar(
-          onSelected: (i) {
-            setState(() {
-              _selectedIndex = i;
-            });
-          },
-          index: _selectedIndex,
-          children: [
-            _buildButton('Shelf', LucideIcons.bookOpen),
-            _buildButton('Discover', LucideIcons.compass),
-            _buildButton('Home', LucideIcons.house),
-            _buildButton('Rankings', LucideIcons.trophy),
-            _buildButton('Profile', LucideIcons.circleUserRound),
-          ],
-        ),
-      ],
-      child: IndexedStack(index: _selectedIndex, children: _screens),
+      ),
     );
   }
 }
