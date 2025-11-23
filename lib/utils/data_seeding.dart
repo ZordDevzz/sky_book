@@ -15,12 +15,14 @@ Future<void> seedInitialData(Database db) async {
   final uuid = Uuid();
 
   // Clear existing data
-  await db.delete('User');
-  await db.delete('Author');
-  await db.delete('Book');
-  await db.delete('Chapter');
-  await db.delete('Tag');
-  await db.delete('Book_Tag');
+  await db.transaction((txn) async {
+    await txn.delete('User');
+    await txn.delete('Author');
+    await txn.delete('Book');
+    await txn.delete('Chapter');
+    await txn.delete('Tag');
+    await txn.delete('Book_Tag');
+  });
 
   // Seed Users
   final userFiles = manifestMap.keys
@@ -64,11 +66,26 @@ Future<void> seedInitialData(Database db) async {
     
     // Generate BookId
     String bookId = uuid.v4();
-    bookJson['BookId'] = bookId;
 
+    // Prepare book map for insertion
+    final bookMap = {
+      'BookId': bookId,
+      'Title': bookJson['title'],
+      'AuthorId': authorId,
+      'Description': bookJson['description'],
+      'CoverImageUrl': bookJson['coverImageUrl'],
+      'ReleaseDate': bookJson['releaseDate'] != null
+          ? DateTime.parse(bookJson['releaseDate']).toIso8601String().substring(0, 10)
+          : null,
+      'Status': bookJson['status'],
+      'Rating': bookJson['rating'],
+      'ViewCount_Total': bookJson['viewCountTotal'],
+      'ViewCount_Monthly': bookJson['viewCountMonthly'],
+      'ViewCount_Weekly': bookJson['viewCountWeekly'],
+    };
 
     // Create and insert book
-    final book = Book.fromMap(bookJson..['AuthorId'] = authorId);
+    final book = Book.fromMap(bookMap);
     await db.insert('Book', book.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
 
@@ -98,8 +115,18 @@ Future<void> seedInitialData(Database db) async {
     // Handle Chapters
     final chapters = bookJson['chapters'] as List;
     for (final chapterJson in chapters) {
-      chapterJson['ChapterId'] = uuid.v4();
-      final chapter = Chapter.fromMap(chapterJson..['BookId'] = book.bookId);
+      final chapterMap = {
+        'ChapterId': uuid.v4(),
+        'BookId': book.bookId,
+        'Title': chapterJson['title'],
+        'Content': chapterJson['content'],
+        'ChapterIndex': chapterJson['chapterIndex'],
+        'WordCount': (chapterJson['content'] as String)
+            .split(RegExp(r'\s+'))
+            .length,
+        'PublishDate': chapterJson['publishDate'],
+      };
+      final chapter = Chapter.fromMap(chapterMap);
       await db.insert('Chapter', chapter.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
     }

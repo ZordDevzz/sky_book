@@ -5,7 +5,7 @@ class Book {
   final String authorId;
   final String? description;
   final String? coverImageUrl;
-  final DateTime? releaseDate;
+  final String? releaseDate;
   final String status;
   final double rating;
   final int viewCountTotal;
@@ -33,7 +33,7 @@ class Book {
       'AuthorId': authorId,
       'Description': description,
       'CoverImageUrl': coverImageUrl,
-      'ReleaseDate': releaseDate?.toIso8601String(),
+      'ReleaseDate': releaseDate,
       'Status': status,
       'Rating': rating,
       'ViewCount_Total': viewCountTotal,
@@ -49,9 +49,7 @@ class Book {
       authorId: map['AuthorId'],
       description: map['Description'],
       coverImageUrl: map['CoverImageUrl'],
-      releaseDate: map['ReleaseDate'] != null
-          ? DateTime.parse(map['ReleaseDate'])
-          : null,
+      releaseDate: map['ReleaseDate'],
       status: map['Status'],
       rating: map['Rating'],
       viewCountTotal: map['ViewCount_Total'],

@@ -21,6 +21,18 @@ class DatabaseService {
     return _database!;
   }
 
+  Future<void> resetDatabase() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = join(documentsDirectory.path, "ThienThu.db");
+    if (await databaseExists(path)) {
+      await deleteDatabase(path);
+    }
+  }
+
   Future<Database> _initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     
