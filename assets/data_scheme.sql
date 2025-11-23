@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS User (
 -- 2. AUTHORS
 CREATE TABLE IF NOT EXISTS Author (
     AuthorId TEXT PRIMARY KEY, -- Store UUID strings here
-    Name TEXT NOT NULL
+    Name TEXT NOT NULL UNIQUE
 );
 
 -- 3. BOOKS

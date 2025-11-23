@@ -1,0 +1,29 @@
+{
+    "title": "The JSON Book",
+    "author": "The author",
+    "tags": [],
+    "description": "A book seeded from a JSON file.",
+    "coverImageUrl": null,
+    "releaseDate": "2005-01-01T12:00:00.000Z",
+    "status": "Completed",
+    "rating": 4.5,
+    "viewCountTotal": 1223122,
+    "viewCountMonthly": 523,
+    "viewCountWeekly": 123,
+    "chapters": [
+        {
+            "title": "Chapter 1: The JSON Beginning",
+            "content": "This is the first chapter, loaded from JSON.",
+            "chapterIndex": 1.0,
+            "wordCount": 50,
+            "publishDate": "2005-11-23T12:01:00.000Z"
+        },
+        {
+            "title": "Chapter 2: The JSON Middle",
+            "content": "This is the second chapter, also from JSON.",
+            "chapterIndex": 2.0,
+            "wordCount": 60,
+            "publishDate": "2005-11-23T12:02:00.000Z"
+        }
+    ]
+}

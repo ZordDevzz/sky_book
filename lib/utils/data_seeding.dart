@@ -1,84 +1,105 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 import '../models/user.dart';
 import '../models/author.dart';
 import '../models/book.dart';
 import '../models/chapter.dart';
+import '../models/tag.dart';
+import '../models/book_tag.dart';
 
 Future<void> seedInitialData(Database db) async {
-  var uuid = Uuid();
+  final manifestContent = await rootBundle.loadString('AssetManifest.json');
+  final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+  final uuid = Uuid();
 
-  // 1. Create a User
-  String userId = uuid.v4();
-  User user = User(
-    userId: userId,
-    username: 'demo_user',
-    passwdHash: 'hashed_password', // In a real app, hash this properly
-    createdAt: DateTime.now(),
-  );
-  await db.insert('User', user.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace);
+  // Clear existing data
+  await db.delete('User');
+  await db.delete('Author');
+  await db.delete('Book');
+  await db.delete('Chapter');
+  await db.delete('Tag');
+  await db.delete('Book_Tag');
 
-  // 2. Create Authors
-  String authorId1 = uuid.v4();
-  String authorId2 = uuid.v4();
-  Author author1 = Author(authorId: authorId1, name: 'First Author');
-  Author author2 = Author(authorId: authorId2, name: 'Second Author');
-  await db.insert('Author', author1.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace);
-  await db.insert('Author', author2.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace);
+  // Seed Users
+  final userFiles = manifestMap.keys
+      .where((String key) => key.startsWith('assets/data/user/'))
+      .toList();
 
-  // 3. Create Books
-  String bookId1 = uuid.v4();
-  String bookId2 = uuid.v4();
-  String bookId3 = uuid.v4();
+  for (String userFile in userFiles) {
+    final userJsonString = await rootBundle.loadString(userFile);
+    final userJson = json.decode(userJsonString);
+    final user = User.fromMap(userJson);
+    await db.insert('User', user.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
 
-  Book book1 = Book(
-    bookId: bookId1,
-    title: 'The First Book',
-    authorId: authorId1,
-    description: 'This is the first book.',
-    status: 'Ongoing',
-    releaseDate: DateTime.now(),
-  );
+  // Seed Books, Authors, Tags, and Chapters
+  final bookFiles = manifestMap.keys
+      .where((String key) => key.startsWith('assets/data/book/'))
+      .toList();
 
-  Book book2 = Book(
-    bookId: bookId2,
-    title: 'The Second Book',
-    authorId: authorId2,
-    description: 'This is the second book.',
-    status: 'Completed',
-    releaseDate: DateTime.now(),
-  );
-  
-  Book book3 = Book(
-    bookId: bookId3,
-    title: 'The Third Book',
-    authorId: authorId1,
-    description: 'This is the third book.',
-    status: 'Halt',
-    releaseDate: DateTime.now(),
-  );
+  for (String bookFile in bookFiles) {
+    final bookJsonString = await rootBundle.loadString(bookFile);
+    final bookJson = json.decode(bookJsonString);
 
-  await db.insert('Book', book1.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace);
-  await db.insert('Book', book2.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace);
-  await db.insert('Book', book3.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace);
+    // Handle Author
+    String authorName = bookJson['author'];
+    List<Map<String, dynamic>> existingAuthors = await db.query(
+      'Author',
+      where: 'Name = ?',
+      whereArgs: [authorName],
+    );
 
-  // 4. Create Chapters for each book
-  for (var bookId in [bookId1, bookId2, bookId3]) {
-    for (int i = 1; i <= 5; i++) {
-      Chapter chapter = Chapter(
-        chapterId: uuid.v4(),
-        bookId: bookId,
-        title: 'Chapter $i',
-        content: 'This is the content of chapter $i of book $bookId.',
-        chapterIndex: i.toDouble(),
-        publishDate: DateTime.now(),
+    String authorId;
+    if (existingAuthors.isNotEmpty) {
+      authorId = existingAuthors.first['AuthorId'];
+    } else {
+      authorId = uuid.v4();
+      Author newAuthor = Author(authorId: authorId, name: authorName);
+      await db.insert('Author', newAuthor.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+    
+    // Generate BookId
+    String bookId = uuid.v4();
+    bookJson['BookId'] = bookId;
+
+
+    // Create and insert book
+    final book = Book.fromMap(bookJson..['AuthorId'] = authorId);
+    await db.insert('Book', book.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+
+    // Handle Tags
+    List<String> tagNames = List<String>.from(bookJson['tags'] ?? []);
+    for (String tagName in tagNames) {
+      List<Map<String, dynamic>> existingTags = await db.query(
+        'Tag',
+        where: 'Name = ?',
+        whereArgs: [tagName],
       );
+
+      int tagId;
+      if (existingTags.isNotEmpty) {
+        tagId = existingTags.first['TagId'];
+      } else {
+        Tag newTag = Tag(tagId: 0, name: tagName); // Let SQLite auto-increment
+        tagId = await db.insert('Tag', newTag.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.ignore);
+      }
+
+      BookTag bookTag = BookTag(bookId: book.bookId, tagId: tagId);
+      await db.insert('Book_Tag', bookTag.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+
+    // Handle Chapters
+    final chapters = bookJson['chapters'] as List;
+    for (final chapterJson in chapters) {
+      chapterJson['ChapterId'] = uuid.v4();
+      final chapter = Chapter.fromMap(chapterJson..['BookId'] = book.bookId);
       await db.insert('Chapter', chapter.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace);
     }
