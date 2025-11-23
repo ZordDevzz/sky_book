@@ -39,11 +39,11 @@ class _AppNavigationState extends State<AppNavigation> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
-            label: 'Shelf',
+            label: 'Tủ sách',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.leaderboard),
-            label: 'Leaderboard',
+            label: 'BXH',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -51,11 +51,11 @@ class _AppNavigationState extends State<AppNavigation> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
-            label: 'Discover',
+            label: 'Khám phá',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: 'Hồ sơ',
           ),
         ],
         currentIndex: _selectedIndex,

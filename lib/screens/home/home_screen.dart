@@ -17,7 +17,7 @@ class HomeScreen extends StatelessWidget {
               color: Theme.of(context).cardColor,
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).shadowColor.withAlpha(20),
+                  color: Colors.grey.withAlpha(20),
                   spreadRadius: 1,
                   blurRadius: 3,
                   offset: const Offset(0, 2), // changes position of shadow
