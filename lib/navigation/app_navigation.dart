@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sky_book/screens/discover/discover_screen.dart';
 import 'package:sky_book/screens/home/home_screen.dart';
 import 'package:sky_book/screens/leaderboard/leaderboard_screen.dart';
 import 'package:sky_book/screens/profile/profile_screen.dart';
 import 'package:sky_book/screens/shelf/shelf_screen.dart';
+import 'package:sky_book/theme/language_provider.dart';
 
 class AppNavigation extends StatefulWidget {
   const AppNavigation({super.key});
@@ -31,31 +33,32 @@ class _AppNavigationState extends State<AppNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
     return Scaffold(
       body: Center(
         child: SafeArea(child: _widgetOptions.elementAt(_selectedIndex)),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
-            label: 'Tủ sách',
+            label: lang.t('shelf'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.leaderboard),
-            label: 'BXH',
+            label: lang.t('leaderboard'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: lang.t('home'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
-            label: 'Khám phá',
+            label: lang.t('discover'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Hồ sơ',
+            label: lang.t('profile'),
           ),
         ],
         currentIndex: _selectedIndex,
