@@ -7,36 +7,42 @@ class LanguageProvider with ChangeNotifier {
 
   final Map<String, Map<String, String>> _localized = {
     'vi': {
+      // Navigation
       'shelf': 'Tủ sách',
       'leaderboard': 'BXH',
       'home': 'Trang chủ',
       'discover': 'Khám phá',
-      'avatar': 'Avatar (URL)',
       'profile': 'Hồ sơ',
+
+      // Profile props
+      'avatar': 'Ảnh hồ sơ (URL)',
       'settings': 'Cài đặt',
       'dark_mode': 'Chế độ nền tối',
       'language': 'Ngôn ngữ',
       'edit_profile': 'Chỉnh sửa hồ sơ',
       'name': 'Tên',
-      'email': 'Email',
       'save': 'Lưu',
       'cancel': 'Hủy',
+      'logout': 'Đăng xuất',
     },
     'en': {
+      // Navigation
       'shelf': 'Shelf',
       'leaderboard': 'Leaderboard',
       'home': 'Home',
       'discover': 'Discover',
-      'avatar': 'Avatar (URL)',
       'profile': 'Profile',
+
+      // Profile props
+      'avatar': 'Avatar (URL)',
       'settings': 'Settings',
       'dark_mode': 'Dark Mode',
       'language': 'Language',
       'edit_profile': 'Edit Profile',
       'name': 'Name',
-      'email': 'Email',
       'save': 'Save',
       'cancel': 'Cancel',
+      'logout': 'Log out',
     },
   };
 
