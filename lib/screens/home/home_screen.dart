@@ -4,12 +4,25 @@ import 'package:sky_book/models/book.dart';
 import 'package:sky_book/repositories/book_repository.dart';
 import 'package:sky_book/services/language_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late Future<List<Book>> _booksFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _booksFuture = Provider.of<BookRepository>(context, listen: false).getAllBooksWithAuthors();
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
-    final bookRepo = Provider.of<BookRepository>(context);
 
     return Scaffold(
       body: Column(
@@ -53,19 +66,43 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Book? book = await bookRepo.getBookById(
-                "06730485-6309-48f4-8415-4937bae317ae",
-              );
-              String bookname = book != null ? book.title : "Not found";
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(bookname), showCloseIcon: true),
-                );
-              }
-            },
-            child: const Text('Button'),
+          Expanded(
+            child: FutureBuilder<List<Book>>(
+              future: _booksFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text(lang.t('no_books_found')));
+                } else {
+                  final books = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      final book = books[index];
+                      return ListTile(
+                        leading: book.coverImageUrl != null
+                            ? Image.asset(
+                                "assets/images/thumbnails/${book.coverImageUrl!}",
+                                width: 50,
+                                height: 80
+                              )
+                            : const Icon(Icons.book),
+                        title: Text(book.title),
+                        subtitle: Text(
+                          book.author?.name ?? 'Unknown Author',
+                        ), // Display author's name
+                        onTap: () {
+                          // Navigate to book details
+                        },
+                      );
+                    },
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),

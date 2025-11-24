@@ -1,25 +1,29 @@
 import 'package:postgres/postgres.dart';
 import '../models/book.dart';
 import '../services/database_service.dart';
+import 'author_repository.dart';
 
 class BookRepository {
   final DatabaseService _dbService;
+  final AuthorRepository _authorRepository;
 
-  BookRepository({required DatabaseService dbService}) : _dbService = dbService;
+  BookRepository({required DatabaseService dbService, required AuthorRepository authorRepository})
+      : _dbService = dbService,
+        _authorRepository = authorRepository;
 
   Future<List<Book>> getAllBooks() async {
     final Connection connection = _dbService.connection;
+    print("Getting all books from database...");
     final List<List<dynamic>> results = await connection.execute(
-      'SELECT * FROM book',
+      Sql.named('SELECT * FROM book'),
     );
 
-    return results.map((row) {
-      return Book(
-        bookId: row[0]
-            .toString(), // Assuming book_id is the first column and UUID
+    List<Book> books = [];
+    for (var row in results) {
+      final book = Book(
+        bookId: row[0].toString(),
         title: row[1] as String,
-        authorId: row[2]
-            .toString(), // Assuming author_id is the third column and UUID
+        authorId: row[2].toString(),
         description: row[3] as String?,
         coverImageUrl: row[4] as String?,
         releaseDate: row[5] != null ? (row[5] as DateTime) : null,
@@ -29,8 +33,26 @@ class BookRepository {
         viewCountMonthly: row[9] as int?,
         viewCountWeekly: row[10] as int?,
       );
-    }).toList();
+      books.add(book);
+    }
+    return books;
   }
+
+  Future<List<Book>> getAllBooksWithAuthors() async {
+    List<Book> books = await getAllBooks();
+    List<Future<void>> authorFutures = [];
+
+    for (var book in books) {
+      authorFutures.add(_authorRepository.getAuthorById(book.authorId).then((author) {
+        print("Fetched author for book ${book.title}: ${author?.name}");
+        book.author = author;
+      }));
+    }
+
+    await Future.wait(authorFutures);
+    return books;
+  }
+
 
   Future<Book?> getBookById(String id) async {
     final Connection connection = _dbService.connection;
@@ -44,7 +66,7 @@ class BookRepository {
     }
 
     final row = results.first;
-    return Book(
+    final book = Book(
       bookId: row[0].toString(),
       title: row[1] as String,
       authorId: row[2].toString(),
@@ -57,7 +79,10 @@ class BookRepository {
       viewCountMonthly: row[9] as int?,
       viewCountWeekly: row[10] as int?,
     );
+    book.author = await _authorRepository.getAuthorById(book.authorId);
+    return book;
   }
+
   Future<void> addBook(Book book) async {
     final Connection connection = _dbService.connection;
     await connection.execute(

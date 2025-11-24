@@ -1,7 +1,10 @@
+import 'package:sky_book/models/author.dart';
+
 class Book {
   String bookId;
   String title;
-  String authorId;
+  String authorId; // Keep for database interaction if needed
+  Author? author; // Embedded Author object
   String? description;
   String? coverImageUrl;
   DateTime? releaseDate;
@@ -15,6 +18,7 @@ class Book {
     required this.bookId,
     required this.title,
     required this.authorId,
+    this.author,
     this.description,
     this.coverImageUrl,
     this.releaseDate,
@@ -30,6 +34,9 @@ class Book {
       bookId: json['book_id'] as String,
       title: json['title'] as String,
       authorId: json['author_id'] as String,
+      author: json['author'] != null
+          ? Author.fromJson(json['author'] as Map<String, dynamic>)
+          : null,
       description: json['description'] as String?,
       coverImageUrl: json['cover_image_url'] as String?,
       releaseDate: json['release_date'] != null
@@ -48,6 +55,7 @@ class Book {
       'book_id': bookId,
       'title': title,
       'author_id': authorId,
+      'author': author?.toJson(),
       'description': description,
       'cover_image_url': coverImageUrl,
       'release_date': releaseDate
