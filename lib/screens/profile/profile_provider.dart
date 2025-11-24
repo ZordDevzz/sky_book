@@ -5,7 +5,7 @@ import '../../models/user.dart';
 import '../../repositories/user_repository.dart';
 
 class ProfileProvider with ChangeNotifier {
-  String name = 'Người dùng';
+  String name = 'Khách';
   String userId = '';
   String passwdHash = '';
   String? pfpUrl;

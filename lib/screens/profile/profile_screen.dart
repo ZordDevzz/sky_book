@@ -43,8 +43,7 @@ class ProfileScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
-            const SizedBox(height: 8),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             ElevatedButton.icon(
               icon: const Icon(Icons.edit),
               label: Text(lang.t('edit_profile')),
@@ -79,6 +78,18 @@ class ProfileScreen extends StatelessWidget {
                 },
               ),
             ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Hẹn gặp lại !'),
+                    showCloseIcon: true,
+                  ),
+                );
+              },
+              child: Text(lang.t('logout')),
+            ),
           ],
         ),
       ),
@@ -103,11 +114,18 @@ class ProfileScreen extends StatelessWidget {
             children: [
               TextField(
                 controller: nameController,
-                decoration: InputDecoration(labelText: lang.t('name')),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: lang.t('name'),
+                ),
               ),
+              const SizedBox(height: 16),
               TextField(
                 controller: avatarController,
-                decoration: InputDecoration(labelText: lang.t('avatar')),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: lang.t('avatar'),
+                ),
               ),
             ],
           ),
