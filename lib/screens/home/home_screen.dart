@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sky_book/screens/book_details/book_details_screen.dart';
 import 'package:sky_book/models/book.dart';
 import 'package:sky_book/screens/home/home_provider.dart';
 import 'package:sky_book/services/language_provider.dart';

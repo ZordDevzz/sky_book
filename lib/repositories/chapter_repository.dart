@@ -5,7 +5,7 @@ import '../services/database_service.dart';
 class ChapterRepository {
   final DatabaseService _dbService;
 
-  ChapterRepository() : _dbService = DatabaseService();
+  ChapterRepository({required DatabaseService dbService}) : _dbService = dbService;
 
   Future<List<Chapter>> getChaptersForBook(String bookId) async {
     final Connection connection = _dbService.connection;
@@ -22,7 +22,7 @@ class ChapterRepository {
         bookId: row[1].toString(), // Assuming book_id is the second column
         title: row[2] as String,
         content: row[3] as String,
-        chapterIndex: (row[4] as num).toDouble(),
+        chapterIndex: double.parse(row[4].toString()),
         wordCount: row[5] as int?,
         publishDate: row[6] != null ? (row[6] as DateTime) : null,
       );
