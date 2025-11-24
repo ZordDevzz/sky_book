@@ -1,0 +1,33 @@
+dựa vào schema, hãy tạo script python thực hiện những yêu cầu sau:
+1.Tạo dữ liệu
+	book:
+		- title: ghép ngẫu nhiên từ các từ Hán-Việt, độ dài từ 2-10 từ
+		- book_id: sử dụng uuid version 4
+		- author_id: chọn một author_id ngẫu nhiên đã tạo trước đó
+		- cover_image_url: sử dụng ngẫu nhiên tên của các tệp trong thư mục thumbnails
+		- description: một đoạn mô tả ngẫu nhiên ngắn khoảng 30-100 từ
+	author:
+		- name: ghép ngẫu nhiên các từ Hán-Việt dạng bút ký
+		- author_id: uuid version 4
+	chapter:
+		- mỗi book cần có khoảng 50-300 chapter
+		- chapter_id: uuid version 4
+		- book_id: thuộc về một book
+		- title: có dạng CH1.. CH2.. CHxx..
+		- content: chuỗi từ ngẫu nhiên (có thể chọn từ một danh sách từ ngẫu nhiên có nghĩa tạo sẵn để ghép lại), tối thiểu 800 từ, tối đa 3000 từ.
+		// Gợi ý: tạo chapter thuộc về 1 book ngay sau khi tạo book đó
+	tag: thể loại văn học mạng
+	book_tag: liên kết ngẫu nhiên mỗi book với 3-5 tag
+	users:
+		- user_id: uuid v4
+		- username: tạo ngẫu nhiên username dạng nickname netizen nhưng chỉ chứa [a-zA-Z0-9]
+		- passwd_hash: hash ngẫu nhiên password (hãy xuất một tệp csv chứa username và pre-hash password)
+		- pfp_url: sử dụng ngẫu nhiên tên tệp trong thư mục pfp
+	shelf:
+		- mỗi user có khoảng 3-10 book
+		- last_read_chapter_id hãy lấy ngẫu nhiên của book được thêm vào shelf
+2.Xuất dữ liệu
+	- xuất dữ liệu ra một tệp sql tương thích với Postgresql
+	- tạo một script khác để đẩy dữ liệu lên Postgresql database bằng thiết lập trong .env
+***CÂN NHẮC***
+	- BẠN LÀ MỘT AI SIÊU CẤP, ĐỪNG MẮC LỖI -
