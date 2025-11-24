@@ -14,6 +14,12 @@ class LanguageProvider with ChangeNotifier {
       'discover': 'Khám phá',
       'profile': 'Hồ sơ',
 
+      // Home
+      'featured:' : 'Truyện Hot',
+      'new_releases': 'Truyện mới',
+      'recommended_for_you': 'Dựa trên sở thích của bạn',
+      'popular_authors': 'Tác giả nổi tiếng',
+
       // Profile props
       'avatar': 'Ảnh hồ sơ (URL)',
       'settings': 'Cài đặt',

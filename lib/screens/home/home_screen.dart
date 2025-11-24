@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sky_book/services/language_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
     return Scaffold(
       body: Column(
         children: [
@@ -27,14 +29,14 @@ class HomeScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.home_outlined),
-                    SizedBox(width: 8.0),
+                    const Icon(Icons.home_outlined),
+                    const SizedBox(width: 8.0),
                     Text(
-                      'Trang chủ',
-                      style: TextStyle(
-                        fontSize: 20,
+                      lang.t('home'),
+                      style: const TextStyle(
+                        fontSize: 20, 
                         fontWeight: FontWeight.bold,
                       ),
                     ),

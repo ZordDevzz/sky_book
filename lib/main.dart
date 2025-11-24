@@ -6,33 +6,16 @@ import 'package:sky_book/screens/home/home_provider.dart';
 import 'package:sky_book/screens/leaderboard/leaderboard_provider.dart';
 import 'package:sky_book/screens/profile/profile_provider.dart';
 import 'package:sky_book/screens/shelf/shelf_provider.dart';
-import 'package:sky_book/services/database_service.dart';
-import 'package:sky_book/theme/theme_provider.dart';
-import 'package:sky_book/theme/language_provider.dart';
+import 'package:sky_book/services/theme_provider.dart';
+import 'package:sky_book/services/language_provider.dart';
 import 'package:sky_book/utils/ui/themes.dart';
 
-const bool _resetDatabaseOnStart =
-    false; // Set to true to wipe and re-seed database on start
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  if (_resetDatabaseOnStart) {
-    await DatabaseService().resetDatabase();
-  }
-
-  await DatabaseService().database;
-  // _testDb();
   runApp(const MyApp());
 }
 
-// _testDb() async {
-//   final bookRepository = BookRepository();
-//   final books = await bookRepository.fetchFeaturedBooks();
-//   for (var book in books) {
-//     print('Book Title: ${book.title}');
-//   }
-// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

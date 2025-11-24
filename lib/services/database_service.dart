@@ -1,64 +1,51 @@
-import 'dart:async';
-import 'package:flutter/services.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-
-import '../utils/data_seeding.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:postgres/postgres.dart';
 
 class DatabaseService {
-  // Singleton pattern
-  static final DatabaseService _instance = DatabaseService._internal();
-  factory DatabaseService() => _instance;
+  static final DatabaseService _singleton = DatabaseService._internal();
+
+  factory DatabaseService() {
+    return _singleton;
+  }
+
   DatabaseService._internal();
 
-  static Database? _database;
+  Connection? _connection;
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDB();
-    return _database!;
-  }
-
-  Future<void> resetDatabase() async {
-    if (_database != null) {
-      await _database!.close();
-      _database = null;
-    }
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "ThienThu.db");
-    if (await databaseExists(path)) {
-      await deleteDatabase(path);
-    }
-  }
-
-  Future<Database> _initDB() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    
-    String path = join(documentsDirectory.path, "ThienThu.db");
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _onCreate,
-    );
-  }
-
-  Future<void> _onCreate(Database db, int version) async {
-    // Enable foreign keys
-    await db.execute("PRAGMA foreign_keys = ON;");
-
-    // Load and execute the SQL schema
-    String schema = await rootBundle.loadString('assets/data_scheme.sql');
-    List<String> statements = schema.split(';');
-
-    for (String statement in statements) {
-      if (statement.trim().isNotEmpty) {
-        await db.execute(statement);
-      }
+  Future<void> connect() async {
+    if (_connection != null) {
+      return; // Already connected
     }
 
-    // Seed initial data
-    await seedInitialData(db);
+    await dotenv.load(fileName: ".env");
+    final connectionString = dotenv.env['DATABASE_URL'];
+
+    if (connectionString == null) {
+      throw Exception("DATABASE_URL not found in .env file");
+    }
+
+    try {
+      _connection = await Connection.openFromUrl(connectionString);
+      print('Database connection opened successfully.');
+    } catch (e) {
+      print('Error connecting to database: $e');
+      _connection = null; // Reset connection on error
+      rethrow;
+    }
+  }
+
+  Future<void> disconnect() async {
+    if (_connection != null) {
+      await _connection!.close();
+      _connection = null;
+      print('Database connection closed.');
+    }
+  }
+
+  Connection get connection {
+    if (_connection == null) {
+      throw Exception('Database not connected. Call connect() first.');
+    }
+    return _connection!;
   }
 }

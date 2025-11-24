@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>BrightSign 九宮格控制面板（UDP）</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f4f4f4;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 150px);
+        gap: 15px;
+    }
+    .btn {
+        width: 150px;
+        height: 150px;
+        font-size: 22px;
+        font-weight: bold;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        color: white;
+    }
+    .btn { background: #3498db; }
+</style>
+
+<script>
+function sendUDP(command) {
+    fetch("http://localhost:3000/send?msg=" + command)
+        .then(() => console.log("已送出：" + command))
+        .catch(err => alert("錯誤：" + err));
+}
+</script>
+
+</head>
+<body>
+
+<div class="grid">
+    <button class="btn" onclick="sendUDP('video1')">影片 1</button>
+    <button class="btn" onclick="sendUDP('video2')">影片 2</button>
+    <button class="btn" onclick="sendUDP('video3')">影片 3</button>
+
+    <button class="btn" onclick="sendUDP('video4')">影片 4</button>
+    <button class="btn" onclick="sendUDP('video5')">影片 5</button>
+    <button class="btn" onclick="sendUDP('video6')">影片 6</button>
+
+    <button class="btn" onclick="sendUDP('video7')">影片 7</button>
+    <button class="btn" onclick="sendUDP('video8')">影片 8</button>
+    <button class="btn" onclick="sendUDP('video9')">影片 9</button>
+</div>
+
+</body>
+</html>

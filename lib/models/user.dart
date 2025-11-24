@@ -1,35 +1,39 @@
+import 'package:uuid/uuid.dart';
+
 class User {
-  final String userId;
-  final String username;
-  final String passwdHash;
-  final String? pfpUrl;
-  final DateTime createdAt;
+  String userId;
+  String username;
+  String passwdHash;
+  String? pfpUrl;
+  DateTime? createdAt;
 
   User({
     required this.userId,
     required this.username,
     required this.passwdHash,
     this.pfpUrl,
-    required this.createdAt,
+    this.createdAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'UserId': userId,
-      'Username': username,
-      'PasswdHash': passwdHash,
-      'PfpUrl': pfpUrl,
-      'CreatedAt': createdAt.toIso8601String(),
-    };
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      userId: json['user_id'] as String,
+      username: json['username'] as String,
+      passwdHash: json['passwd_hash'] as String,
+      pfpUrl: json['pfp_url'] as String?,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+    );
   }
 
-  factory User.fromMap(Map<String, dynamic> map) {
-    return User(
-      userId: map['UserId'],
-      username: map['Username'],
-      passwdHash: map['PasswdHash'],
-      pfpUrl: map['PfpUrl'],
-      createdAt: DateTime.parse(map['CreatedAt']),
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': userId,
+      'username': username,
+      'passwd_hash': passwdHash,
+      'pfp_url': pfpUrl,
+      'created_at': createdAt?.toIso8601String(),
+    };
   }
 }

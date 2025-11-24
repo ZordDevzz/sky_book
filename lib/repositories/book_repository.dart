@@ -1,30 +1,85 @@
+import 'package:postgres/postgres.dart';
 import '../models/book.dart';
-import '../models/chapter.dart';
 import '../services/database_service.dart';
 
 class BookRepository {
-  final dbService = DatabaseService();
+  final DatabaseService _dbService;
 
-  Future<List<Book>> fetchFeaturedBooks() async {
-    final db = await dbService.database;
-    final List<Map<String, dynamic>> maps = await db.query('Book', orderBy: 'ViewCount_Weekly DESC', limit: 10);
+  BookRepository() : _dbService = DatabaseService();
 
-    return List.generate(maps.length, (i) {
-      return Book.fromMap(maps[i]);
-    });
-  }
-
-  Future<Chapter?> getChapterContent(String bookId, double chapterIndex) async {
-    final db = await dbService.database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'Chapter',
-      where: 'BookId = ? AND ChapterIndex = ?',
-      whereArgs: [bookId, chapterIndex],
+  Future<List<Book>> getAllBooks() async {
+    final Connection connection = _dbService.connection;
+    final List<List<dynamic>> results = await connection.execute(
+      'SELECT * FROM book',
     );
 
-    if (maps.isNotEmpty) {
-      return Chapter.fromMap(maps.first);
+    return results.map((row) {
+      return Book(
+        bookId: row[0]
+            .toString(), // Assuming book_id is the first column and UUID
+        title: row[1] as String,
+        authorId: row[2]
+            .toString(), // Assuming author_id is the third column and UUID
+        description: row[3] as String?,
+        coverImageUrl: row[4] as String?,
+        releaseDate: row[5] != null ? (row[5] as DateTime) : null,
+        status: row[6] as String?,
+        rating: (row[7] as num?)?.toDouble(),
+        viewCountTotal: row[8] as int?,
+        viewCountMonthly: row[9] as int?,
+        viewCountWeekly: row[10] as int?,
+      );
+    }).toList();
+  }
+
+  Future<Book?> getBookById(String id) async {
+    final Connection connection = _dbService.connection;
+    final List<List<dynamic>> results = await connection.execute(
+      Sql.named('SELECT * FROM book WHERE book_id = @id'),
+      parameters: {'id': id},
+    );
+
+    if (results.isEmpty) {
+      return null;
     }
-    return null;
+
+    final row = results.first;
+    return Book(
+      bookId: row[0].toString(),
+      title: row[1] as String,
+      authorId: row[2].toString(),
+      description: row[3] as String?,
+      coverImageUrl: row[4] as String?,
+      releaseDate: row[5] != null ? (row[5] as DateTime) : null,
+      status: row[6] as String?,
+      rating: (row[7] as num?)?.toDouble(),
+      viewCountTotal: row[8] as int?,
+      viewCountMonthly: row[9] as int?,
+      viewCountWeekly: row[10] as int?,
+    );
+  }
+
+  // Example of adding a book - note: for a real app, you'd likely pass a Book object and construct the query
+  Future<void> addBook(Book book) async {
+    final Connection connection = _dbService.connection;
+    await connection.execute(
+      '''
+      INSERT INTO book (book_id, title, author_id, description, cover_image_url, release_date, status, rating, view_count_total, view_count_monthly, view_count_weekly)
+      VALUES (@book_id, @title, @author_id, @description, @cover_image_url, @release_date, @status, @rating, @view_count_total, @view_count_monthly, @view_count_weekly)
+      ''',
+      parameters: {
+        'book_id': book.bookId,
+        'title': book.title,
+        'author_id': book.authorId,
+        'description': book.description,
+        'cover_image_url': book.coverImageUrl,
+        'release_date': book.releaseDate,
+        'status': book.status,
+        'rating': book.rating,
+        'view_count_total': book.viewCountTotal,
+        'view_count_monthly': book.viewCountMonthly,
+        'view_count_weekly': book.viewCountWeekly,
+      },
+    );
   }
 }

@@ -1,23 +1,25 @@
+import 'package:uuid/uuid.dart';
+
 class Author {
-  final String authorId;
-  final String name;
+  String authorId;
+  String name;
 
   Author({
     required this.authorId,
     required this.name,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'AuthorId': authorId,
-      'Name': name,
-    };
+  factory Author.fromJson(Map<String, dynamic> json) {
+    return Author(
+      authorId: json['author_id'] as String,
+      name: json['name'] as String,
+    );
   }
 
-  factory Author.fromMap(Map<String, dynamic> map) {
-    return Author(
-      authorId: map['AuthorId'],
-      name: map['Name'],
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      'author_id': authorId,
+      'name': name,
+    };
   }
 }

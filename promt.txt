@@ -1,26 +1,20 @@
-Act as a Senior Flutter Developer. I am building an offline novel reader app called "Thien Thu". I need to integrate **SQLite** using the `sqflite` package.
+**Context:** I am building a mobile novel reader application using Flutter. I need to integrate a PostgreSQL database as the backend data source.
 
-**Project Setup:**
-1.  **File Location:** I have the database schema defined in a file named `data_scheme.sql` located in my /assets/ folder.
-2.  **Architecture:** The app works offline but mimics a client-server architecture.
+**Resources:**
+1.  **Schema:** The database structure is defined in the file `/assets/data_scheme.sql`. It includes tables for `users`, `author`, `book`, `chapter`, `tag`, `book_tag`, and `shelf`.
+2.  **Configuration:** The PostgreSQL connection string is stored in a `.env` file located at the project root directory.
 
-**Your Task:**
-Please provide the Dart code for the following components:
+**Task:**
+Please implement the database integration layer for my Flutter project based on the provided resources.
 
-**1. Data Models (Dart Classes):**
-* Create data classes based on the SQL schema provided.
-* Include `toMap()` and `fromMap()` methods for database compatibility.
+**Requirements:**
+1.  **Dependencies:** Suggest the necessary packages to add to `pubspec.yaml` (e.g., `postgres`, `flutter_dotenv`, `uuid`).
+2.  **Data Models:** Generate Dart data models (classes) for all tables defined in `data_scheme.sql`. 
+    * Ensure proper type mapping (e.g., UUID to String, TIMESTAMPTZ to DateTime).
+    * Include `fromJson` and `toJson` methods.
+3.  **Database Service:** Create a singleton `DatabaseService` class that:
+    * Loads the connection string from the `.env` file.
+    * Establishes and manages the connection to the PostgreSQL database.
+4.  **Repositories:** Create a basic repository pattern example for the `Book` and `Chapter` tables to demonstrate how to query data (e.g., `getBooks`, `getChapterContent`).
 
-**2. Database Service (Singleton):**
-* Create a `DatabaseService` class to handle the connection.
-* **Crucial:** In the `onCreate` callback, write logic to **load the `data_scheme.sql` file from the app assets** (using `rootBundle`), split the queries (if necessary), and execute them to create the tables. Do not hardcode the CREATE statements in Dart.
-
-**3. Data Seeding (Mocking Server Data):**
-* Create a function `seedInitialData(Database db)` that runs only if the database is empty.
-* Generate dummy data for: 1 User, 2 Authors, 3 Books (with mixed Status), and 5 Chapters per book.
-* Use the `uuid` package to generate unique IDs for the primary keys.
-
-**4. Repository Implementation:**
-* Create a `BookRepository` class.
-* Implement methods like `fetchFeaturedBooks()` and `getChapterContent(String bookId, double chapterIndex)`.
-* The repository should abstract the direct DB calls, making the UI feel like it's calling an API.
+**Note:** Ensure the code handles asynchronous operations and potential connection errors gracefully.

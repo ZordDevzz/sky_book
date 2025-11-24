@@ -1,23 +1,23 @@
 class Tag {
-  final int tagId;
-  final String name;
+  int tagId;
+  String name;
 
   Tag({
     required this.tagId,
     required this.name,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'TagId': tagId,
-      'Name': name,
-    };
+  factory Tag.fromJson(Map<String, dynamic> json) {
+    return Tag(
+      tagId: json['tag_id'] as int,
+      name: json['name'] as String,
+    );
   }
 
-  factory Tag.fromMap(Map<String, dynamic> map) {
-    return Tag(
-      tagId: map['TagId'],
-      name: map['Name'],
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      'tag_id': tagId,
+      'name': name,
+    };
   }
 }

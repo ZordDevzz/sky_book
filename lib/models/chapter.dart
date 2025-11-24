@@ -1,11 +1,13 @@
+import 'package:uuid/uuid.dart';
+
 class Chapter {
-  final String chapterId;
-  final String bookId;
-  final String title;
-  final String content;
-  final double chapterIndex;
-  final int? wordCount;
-  final DateTime publishDate;
+  String chapterId;
+  String bookId;
+  String title;
+  String content;
+  double chapterIndex;
+  int? wordCount;
+  DateTime? publishDate;
 
   Chapter({
     required this.chapterId,
@@ -14,30 +16,32 @@ class Chapter {
     required this.content,
     required this.chapterIndex,
     this.wordCount,
-    required this.publishDate,
+    this.publishDate,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'ChapterId': chapterId,
-      'BookId': bookId,
-      'Title': title,
-      'Content': content,
-      'ChapterIndex': chapterIndex,
-      'WordCount': wordCount,
-      'PublishDate': publishDate.toIso8601String(),
-    };
+  factory Chapter.fromJson(Map<String, dynamic> json) {
+    return Chapter(
+      chapterId: json['chapter_id'] as String,
+      bookId: json['book_id'] as String,
+      title: json['title'] as String,
+      content: json['content'] as String,
+      chapterIndex: (json['chapter_index'] as num).toDouble(),
+      wordCount: json['word_count'] as int?,
+      publishDate: json['publish_date'] != null
+          ? DateTime.parse(json['publish_date'] as String)
+          : null,
+    );
   }
 
-  factory Chapter.fromMap(Map<String, dynamic> map) {
-    return Chapter(
-      chapterId: map['ChapterId'],
-      bookId: map['BookId'],
-      title: map['Title'],
-      content: map['Content'],
-      chapterIndex: map['ChapterIndex'],
-      wordCount: map['WordCount'],
-      publishDate: DateTime.parse(map['PublishDate']),
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      'chapter_id': chapterId,
+      'book_id': bookId,
+      'title': title,
+      'content': content,
+      'chapter_index': chapterIndex,
+      'word_count': wordCount,
+      'publish_date': publishDate?.toIso8601String(),
+    };
   }
 }

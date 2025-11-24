@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sky_book/screens/profile/profile_provider.dart';
 import 'package:sky_book/screens/profile/settings_screen.dart';
-import 'package:sky_book/theme/theme_provider.dart';
-import 'package:sky_book/theme/language_provider.dart';
+import 'package:sky_book/services/theme_provider.dart';
+import 'package:sky_book/services/language_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -142,7 +142,7 @@ class ProfileScreen extends StatelessWidget {
                       ? null
                       : avatarController.text.trim(),
                 );
-                Navigator.of(ctx).pop();
+                if (ctx.mounted) Navigator.of(ctx).pop();
               },
               child: Text(lang.t('save')),
             ),
