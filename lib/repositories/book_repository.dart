@@ -41,12 +41,18 @@ class BookRepository {
   }
 
   Future<List<Book>> getAllBooksWithAuthors() async {
+    final sw = Stopwatch()..start();
     final books = await getAllBooks();
+    print('getAllBooks took: ${sw.elapsedMilliseconds} ms');
+
+    sw.reset();
+    sw.start();
     if (books.isEmpty) return books;
 
     final authorIds = books.map((b) => b.authorId).toSet().toList();
 
     final authorsById = await _authorRepository.getAuthorsByIds(authorIds);
+    print('attach authors took: ${sw.elapsedMilliseconds} ms');
 
     for (final book in books) {
       book.author = authorsById[book.authorId];
