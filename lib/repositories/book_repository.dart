@@ -1,4 +1,5 @@
 import 'package:postgres/postgres.dart';
+import 'package:sky_book/repositories/tag_repository.dart';
 import '../models/book.dart';
 import '../services/database_service.dart';
 import 'author_repository.dart';
@@ -6,12 +7,15 @@ import 'author_repository.dart';
 class BookRepository {
   final DatabaseService _dbService;
   final AuthorRepository _authorRepository;
+  final TagRepository _tagRepository;
 
   BookRepository({
     required DatabaseService dbService,
     required AuthorRepository authorRepository,
-  }) : _dbService = dbService,
-       _authorRepository = authorRepository;
+    required TagRepository tagRepository,
+  })  : _dbService = dbService,
+        _authorRepository = authorRepository,
+        _tagRepository = tagRepository;
 
   Future<List<Book>> getAllBooks() async {
     final Connection connection = _dbService.connection;
@@ -31,16 +35,16 @@ class BookRepository {
         releaseDate: row[5] != null ? (row[5] as DateTime) : null,
         status: row[6] as String?,
         rating: double.tryParse(row[7]?.toString() ?? ''),
-        viewCountTotal: row[8] as int?,
-        viewCountMonthly: row[9] as int?,
-        viewCountWeekly: row[10] as int?,
+        viewCountTotal: row[8] as int,
+        viewCountMonthly: row[9] as int,
+        viewCountWeekly: row[10] as int,
       );
       books.add(book);
     }
     return books;
   }
 
-  Future<List<Book>> getAllBooksWithAuthors() async {
+  Future<List<Book>> getAllBooksWithDetails() async {
     final sw = Stopwatch()..start();
     final books = await getAllBooks();
     print('getAllBooks took: ${sw.elapsedMilliseconds} ms');
@@ -49,13 +53,18 @@ class BookRepository {
     sw.start();
     if (books.isEmpty) return books;
 
+    final bookIds = books.map((b) => b.bookId).toSet().toList();
     final authorIds = books.map((b) => b.authorId).toSet().toList();
 
     final authorsById = await _authorRepository.getAuthorsByIds(authorIds);
     print('attach authors took: ${sw.elapsedMilliseconds} ms');
 
+    final tagsByBookId = await _tagRepository.getTagsForBooks(bookIds);
+    print('attach tags took: ${sw.elapsedMilliseconds} ms');
+
     for (final book in books) {
       book.author = authorsById[book.authorId];
+      book.tags = tagsByBookId[book.bookId] ?? [];
     }
 
     return books;
@@ -82,11 +91,14 @@ class BookRepository {
       releaseDate: row[5] != null ? (row[5] as DateTime) : null,
       status: row[6] as String?,
       rating: double.tryParse(row[7]?.toString() ?? ''),
-      viewCountTotal: row[8] as int?,
-      viewCountMonthly: row[9] as int?,
-      viewCountWeekly: row[10] as int?,
+      viewCountTotal: row[8] as int,
+      viewCountMonthly: row[9] as int,
+      viewCountWeekly: row[10] as int,
     );
     book.author = await _authorRepository.getAuthorById(book.authorId);
+    // You might want to fetch tags here as well for a single book
+    final tags = await _tagRepository.getTagsForBooks([book.bookId]);
+    book.tags = tags[book.bookId] ?? [];
     return book;
   }
 
@@ -111,5 +123,6 @@ class BookRepository {
         'view_count_weekly': book.viewCountWeekly,
       },
     );
+    // You would also need to handle saving tags here if you add/update books
   }
 }

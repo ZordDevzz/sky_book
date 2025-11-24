@@ -15,10 +15,11 @@ class LanguageProvider with ChangeNotifier {
       'profile': 'Hồ sơ',
 
       // Home
-      'featured:': 'Truyện Hot',
+      'featured_books': 'Truyện Hot Tuần',
       'new_releases': 'Truyện mới',
       'recommended_for_you': 'Dựa trên sở thích của bạn',
       'popular_authors': 'Tác giả nổi tiếng',
+      'no_books_found': 'Không tìm thấy truyện nào',
 
       // Profile props
       'avatar': 'Ảnh hồ sơ (URL)',

@@ -1,4 +1,5 @@
 import 'package:sky_book/models/author.dart';
+import 'package:sky_book/models/tag.dart';
 
 class Book {
   String bookId;
@@ -10,9 +11,10 @@ class Book {
   DateTime? releaseDate;
   String? status; // 'Ongoing', 'Completed', 'Halt'
   double? rating;
-  int? viewCountTotal;
-  int? viewCountMonthly;
-  int? viewCountWeekly;
+  int viewCountTotal = 0;
+  int viewCountMonthly = 0;
+  int viewCountWeekly = 0;
+  List<Tag> tags;
 
   Book({
     required this.bookId,
@@ -24,9 +26,10 @@ class Book {
     this.releaseDate,
     this.status,
     this.rating,
-    this.viewCountTotal,
-    this.viewCountMonthly,
-    this.viewCountWeekly,
+    this.viewCountTotal = 0,
+    this.viewCountMonthly = 0,
+    this.viewCountWeekly = 0,
+    this.tags = const [],
   });
 
   factory Book.fromJson(Map<String, dynamic> json) {
@@ -44,9 +47,9 @@ class Book {
           : null,
       status: json['status'] as String?,
       rating: (json['rating'] as num?)?.toDouble(),
-      viewCountTotal: json['view_count_total'] as int?,
-      viewCountMonthly: json['view_count_monthly'] as int?,
-      viewCountWeekly: json['view_count_weekly'] as int?,
+      viewCountTotal: json['view_count_total'] as int,
+      viewCountMonthly: json['view_count_monthly'] as int,
+      viewCountWeekly: json['view_count_weekly'] as int,
     );
   }
 

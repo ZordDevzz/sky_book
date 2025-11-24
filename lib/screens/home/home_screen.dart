@@ -1,28 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sky_book/models/book.dart';
-import 'package:sky_book/repositories/book_repository.dart';
+import 'package:sky_book/screens/home/home_provider.dart';
 import 'package:sky_book/services/language_provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  late Future<List<Book>> _booksFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _booksFuture = Provider.of<BookRepository>(context, listen: false).getAllBooksWithAuthors();
-  }
 
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
+    final provider = Provider.of<HomeProvider>(context);
 
     return Scaffold(
       body: Column(
@@ -67,41 +54,138 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<Book>>(
-              future: _booksFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text(lang.t('no_books_found')));
-                } else {
-                  final books = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: 10,
-                    itemBuilder: (context, index) {
-                      final book = books[index];
-                      return ListTile(
-                        leading: book.coverImageUrl != null
-                            ? Image.asset(
-                                "assets/images/thumbnails/${book.coverImageUrl!}",
-                                width: 50,
-                                height: 80
-                              )
-                            : const Icon(Icons.book),
-                        title: Text(book.title),
-                        subtitle: Text(
-                          book.author?.name ?? 'Unknown Author',
-                        ), // Display author's name
-                        onTap: () {
-                          // Navigate to book details
-                        },
-                      );
-                    },
-                  );
-                }
-              },
+            child: RefreshIndicator(
+              onRefresh: () => provider.fetchBooks(),
+              child: ListView(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      lang.t(
+                        'featured_books',
+                      ), // Assuming 'featured_books' key exists in language provider
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 250,
+                    child: provider.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : provider.featuredBooks.isEmpty
+                        ? Center(child: Text(lang.t('no_books_found')))
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.all(6.0),
+                            itemCount: provider.featuredBooks.length,
+                            itemBuilder: (context, index) {
+                              final book = provider.featuredBooks[index];
+                              return SizedBox(
+                                width: 150,
+                                child: Card(
+                                  elevation: 4.0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: InkWell(
+                                    onTap: () {
+                                      // Navigate to book details
+                                    },
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              const BorderRadius.vertical(
+                                                top: Radius.circular(8.0),
+                                              ),
+                                          child: book.coverImageUrl != null
+                                              ? Image.asset(
+                                                  "assets/images/thumbnails/${book.coverImageUrl!}",
+                                                  fit: BoxFit.fill,
+                                                  height:
+                                                      180, // Fixed image height
+                                                )
+                                              : const SizedBox(
+                                                  height: 180,
+                                                  child: Icon(
+                                                    Icons.book,
+                                                    size: 50,
+                                                  ),
+                                                ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                            2.0,
+                                            8.0,
+                                            2.0,
+                                            0.0,
+                                          ),
+                                          child: Text(
+                                            book.title,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16.0,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 2.0,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.person,
+                                                size: 12.0,
+                                                color: Colors.grey,
+                                              ),
+                                              const SizedBox(width: 4.0),
+                                              Expanded(
+                                                child: Text(
+                                                  book.author?.name ??
+                                                      'Unknown',
+                                                  style: const TextStyle(
+                                                    fontSize: 12.0,
+                                                    color: Colors.grey,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        // if (book.tags.isNotEmpty)
+                                        //   Padding(
+                                        //     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                        //     child: Text(
+                                        //       book.tags.first.name,
+                                        //       style: const TextStyle(
+                                        //         fontSize: 12.0,
+                                        //         color: Colors.blue,
+                                        //       ),
+                                        //       maxLines: 1,
+                                        //       overflow: TextOverflow.ellipsis,
+                                        //     ),
+                                        //   ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                  Divider(color: Colors.grey.withAlpha(100), thickness: 1.0),
+                ],
+              ),
             ),
           ),
         ],
