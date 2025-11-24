@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sky_book/screens/book_details/book_details_screen.dart';
@@ -276,7 +274,13 @@ class _FeaturedCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () {
-            // TODO: navigate to book details
+            Navigator.push(
+              context,
+
+              MaterialPageRoute(
+                builder: (context) => BookDetailsScreen(bookId: book.bookId),
+              ),
+            );
           },
           child: Stack(
             fit: StackFit.expand,
@@ -416,121 +420,276 @@ class _NewReleasesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-          child: Text(
-            lang.t('new_releases'),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primary.withOpacity(0.08),
+            colorScheme.secondary.withOpacity(0.06),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        if (isLoading)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32),
-            child: Center(child: CircularProgressIndicator()),
-          )
-        else if (books.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Center(child: Text(lang.t('no_books_found'))),
-          )
-        else
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: books.length,
-            itemBuilder: (context, index) {
-              final book = books[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 6.0,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    lang.t('new_releases'),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    lang.t('recently_posted'),
+                    style: TextStyle(
+                      color: colorScheme.onSurface.withOpacity(0.65),
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 64,
-                        height: 88,
-                        child: book.coverImageUrl != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  "assets/images/thumbnails/${book.coverImageUrl!}",
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : const Icon(Icons.book),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withOpacity(0.14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.new_releases,
+                      size: 16,
+                      color: colorScheme.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${books.length}',
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 14.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              book.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.0,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 6.0),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.person,
-                                  size: 14.0,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(width: 4.0),
-                                Expanded(
-                                  child: Text(
-                                    book.author?.name ?? 'Unknown',
-                                    style: const TextStyle(
-                                      fontSize: 12.0,
-                                      color: Colors.grey,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6.0),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.calendar_today,
-                                  size: 14.0,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(width: 4.0),
-                                Text(
-                                  book.releaseDate != null
-                                      ? "${book.releaseDate!.year}-${book.releaseDate!.month.toString().padLeft(2, '0')}-${book.releaseDate!.day.toString().padLeft(2, '0')}"
-                                      : 'N/A',
-                                  style: const TextStyle(
-                                    fontSize: 12.0,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (books.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              child: Center(child: Text(lang.t('no_books_found'))),
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: books.length,
+              separatorBuilder: (_, __) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 1,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.transparent,
+                              colorScheme.outlineVariant,
+                              Colors.transparent,
+                            ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            },
+              ),
+              itemBuilder: (context, index) {
+                final book = books[index];
+                return InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            BookDetailsScreen(bookId: book.bookId),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      gradient: LinearGradient(
+                        colors: [
+                          colorScheme.surface.withOpacity(0.9),
+                          colorScheme.surface.withOpacity(0.7),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: SizedBox(
+                            width: 72,
+                            height: 96,
+                            child: book.coverImageUrl != null
+                                ? Image.asset(
+                                    "assets/images/thumbnails/${book.coverImageUrl!}",
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container(
+                                    color: colorScheme.surfaceVariant,
+                                    child: const Icon(Icons.book),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                book.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.person,
+                                    size: 14,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      book.author?.name ?? 'Unknown',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  _NewChip(
+                                    icon: Icons.calendar_month,
+                                    label: book.releaseDate != null
+                                        ? "${book.releaseDate!.day.toString().padLeft(2, '0')}/${book.releaseDate!.month.toString().padLeft(2, '0')}/${book.releaseDate!.year}"
+                                        : 'N/A',
+                                    color: colorScheme.primary,
+                                    background: colorScheme.primary.withOpacity(
+                                      0.12,
+                                    ),
+                                  ),
+                                  if (book.tags.isNotEmpty)
+                                    _NewChip(
+                                      icon: Icons.label_outline,
+                                      label: book.tags.first.name,
+                                      color: colorScheme.primary,
+                                      background: colorScheme.primary
+                                          .withOpacity(0.12),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NewChip extends StatelessWidget {
+  const _NewChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.background,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }

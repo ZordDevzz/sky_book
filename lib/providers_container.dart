@@ -36,8 +36,6 @@ List<SingleChildWidget> providers = [
   ChangeNotifierProvider(create: (_) => ThemeProvider()),
   ChangeNotifierProvider(create: (_) => LanguageProvider()),
   ChangeNotifierProvider(create: (_) => ShelfProvider()),
-  ChangeNotifierProvider(create: (_) => LeaderboardProvider()),
-  ChangeNotifierProvider(create: (_) => DiscoverProvider()),
   ChangeNotifierProxyProvider<UserRepository, AuthProvider>(
     create: (context) => AuthProvider(
       userRepository: Provider.of<UserRepository>(context, listen: false),
@@ -56,5 +54,17 @@ List<SingleChildWidget> providers = [
     create: (context) =>
         HomeProvider(Provider.of<BookRepository>(context, listen: false)),
     update: (context, bookRepo, previous) => HomeProvider(bookRepo),
+  ),
+  ChangeNotifierProxyProvider<BookRepository, DiscoverProvider>(
+    create: (context) =>
+        DiscoverProvider(Provider.of<BookRepository>(context, listen: false)),
+    update: (context, bookRepo, previous) =>
+        (previous ?? DiscoverProvider(bookRepo))..updateRepository(bookRepo),
+  ),
+  ChangeNotifierProxyProvider<BookRepository, LeaderboardProvider>(
+    create: (context) =>
+        LeaderboardProvider(Provider.of<BookRepository>(context, listen: false)),
+    update: (context, bookRepo, previous) =>
+        (previous ?? LeaderboardProvider(bookRepo))..updateRepository(bookRepo),
   ),
 ];

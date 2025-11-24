@@ -36,6 +36,34 @@ class LanguageProvider with ChangeNotifier {
       'popular_authors': 'Tác giả được tìm đọc nhiều nhất',
       'no_books_found': 'Không tìm thấy truyện nào',
       'book_rolete': 'Đọc một truyện ngẫu nhiên',
+      'recently_posted': 'Bổ sung gần đây',
+
+      // Book details
+      'details': 'Thông tin truyện',
+      'add_to_shelf': 'Thêm vào tủ sách',
+      'read_from_first': 'Đọc từ đầu',
+      'description': 'Mô tả',
+      'chapters': 'Tất cả chương',
+      'no_description_available': 'Không có mô tả',
+
+      // Discover
+      'discover_subtitle': 'Tìm kiếm, lọc và khám phá truyện mới',
+      'search_hint': 'Tìm kiếm theo tên hoặc tác giả...',
+      'filter_tags': 'Thể loại',
+      'sort_by': 'Sắp xếp',
+      'sort_trending': 'Xu hướng',
+      'sort_newest': 'Mới nhất',
+      'sort_rating': 'Đánh giá cao',
+      'no_results': 'Không tìm thấy truyện phù hợp',
+
+      // Leaderboard
+      'leaderboard_subtitle': 'Top truyện được đọc nhiều',
+      'range_week': 'Tuần',
+      'range_month': 'Tháng',
+      'range_all': 'Tất cả',
+      'views_week': 'lượt/tuần',
+      'views_month': 'lượt/tháng',
+      'views_total': 'lượt tổng',
 
       // Profile props
       'avatar': 'Ảnh hồ sơ (URL)',
@@ -82,6 +110,34 @@ class LanguageProvider with ChangeNotifier {
       'recommended_for_you': 'Recommended',
       'popular_authors': 'Popular authors',
       'no_books_found': 'Couldn\'t find novels',
+      'recently_posted': 'Recently posted',
+
+      // Book details
+      'details': 'Novel details',
+      'add_to_shelf': 'Add to shelf',
+      'read_from_first': 'Read from beginning',
+      'description': 'Description',
+      'chapters': 'Chapters',
+      'no_description_available': 'No description available',
+
+      // Discover
+      'discover_subtitle': 'Search, filter and explore new novels',
+      'search_hint': 'Search by title or author...',
+      'filter_tags': 'Tags',
+      'sort_by': 'Sort by',
+      'sort_trending': 'Trending',
+      'sort_newest': 'Newest',
+      'sort_rating': 'Top rated',
+      'no_results': 'No matching novels found',
+
+      // Leaderboard
+      'leaderboard_subtitle': 'Most read novels',
+      'range_week': 'Weekly',
+      'range_month': 'Monthly',
+      'range_all': 'All time',
+      'views_week': 'views/week',
+      'views_month': 'views/month',
+      'views_total': 'total views',
 
       // Profile props
       'avatar': 'Avatar (URL)',
