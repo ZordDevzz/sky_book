@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sky_book/models/book.dart';
+import 'package:sky_book/repositories/book_repository.dart';
 import 'package:sky_book/services/language_provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -7,6 +9,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
+    final bookRepo = Provider.of<BookRepository>(context);
+
     return Scaffold(
       body: Column(
         children: [
@@ -36,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       lang.t('home'),
                       style: const TextStyle(
-                        fontSize: 20, 
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -48,6 +52,20 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Book? book = await bookRepo.getBookById(
+                "06730485-6309-48f4-8415-4937bae317ae",
+              );
+              String bookname = book != null ? book.title : "Not found";
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(bookname), showCloseIcon: true),
+                );
+              }
+            },
+            child: const Text('Button'),
           ),
         ],
       ),

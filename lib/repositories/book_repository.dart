@@ -5,7 +5,7 @@ import '../services/database_service.dart';
 class BookRepository {
   final DatabaseService _dbService;
 
-  BookRepository() : _dbService = DatabaseService();
+  BookRepository({required DatabaseService dbService}) : _dbService = dbService;
 
   Future<List<Book>> getAllBooks() async {
     final Connection connection = _dbService.connection;
@@ -24,7 +24,7 @@ class BookRepository {
         coverImageUrl: row[4] as String?,
         releaseDate: row[5] != null ? (row[5] as DateTime) : null,
         status: row[6] as String?,
-        rating: (row[7] as num?)?.toDouble(),
+        rating: double.tryParse(row[7]?.toString() ?? ''),
         viewCountTotal: row[8] as int?,
         viewCountMonthly: row[9] as int?,
         viewCountWeekly: row[10] as int?,
@@ -52,21 +52,19 @@ class BookRepository {
       coverImageUrl: row[4] as String?,
       releaseDate: row[5] != null ? (row[5] as DateTime) : null,
       status: row[6] as String?,
-      rating: (row[7] as num?)?.toDouble(),
+      rating: double.tryParse(row[7]?.toString() ?? ''),
       viewCountTotal: row[8] as int?,
       viewCountMonthly: row[9] as int?,
       viewCountWeekly: row[10] as int?,
     );
   }
-
-  // Example of adding a book - note: for a real app, you'd likely pass a Book object and construct the query
   Future<void> addBook(Book book) async {
     final Connection connection = _dbService.connection;
     await connection.execute(
-      '''
+      Sql.named('''
       INSERT INTO book (book_id, title, author_id, description, cover_image_url, release_date, status, rating, view_count_total, view_count_monthly, view_count_weekly)
       VALUES (@book_id, @title, @author_id, @description, @cover_image_url, @release_date, @status, @rating, @view_count_total, @view_count_monthly, @view_count_weekly)
-      ''',
+      '''),
       parameters: {
         'book_id': book.bookId,
         'title': book.title,

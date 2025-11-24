@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sky_book/navigation/app_navigation.dart';
+import 'package:sky_book/repositories/book_repository.dart';
 import 'package:sky_book/screens/discover/discover_provider.dart';
 import 'package:sky_book/screens/home/home_provider.dart';
 import 'package:sky_book/screens/leaderboard/leaderboard_provider.dart';
 import 'package:sky_book/screens/profile/profile_provider.dart';
 import 'package:sky_book/screens/shelf/shelf_provider.dart';
+import 'package:sky_book/services/database_service.dart';
 import 'package:sky_book/services/theme_provider.dart';
 import 'package:sky_book/services/language_provider.dart';
 import 'package:sky_book/utils/ui/themes.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -24,6 +24,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<BookRepository>(
+          create: (_) => BookRepository(dbService: DatabaseService()),
+        ),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => ShelfProvider()),
