@@ -14,6 +14,17 @@ class LanguageProvider with ChangeNotifier {
       'discover': 'Khám phá',
       'profile': 'Hồ sơ',
 
+      // Auth
+      'title_login': 'Đăng nhập',
+      'title_register': 'Tạo tài khoản',
+      'username': 'Tên đăng nhập',
+      'passw': 'Mật khẩu',
+      'repeat_passw': 'Nhập lại mật khẩu',
+      'login_btn': 'Đăng nhập',
+      'register_btn': 'Đăng ký',
+      'no_account': 'Chưa có tài khoản? Đăng ký ngay',
+      'has_account': 'Đã có tài khoản? Đăng nhập ngay',
+
       // Home
       'featured_books': 'Truyện Hot Tuần',
       'new_releases': 'Truyện mới',
@@ -22,18 +33,21 @@ class LanguageProvider with ChangeNotifier {
       'no_books_found': 'Không tìm thấy truyện nào',
       'book_rolete': 'Đọc một truyện ngẫu nhiên',
 
-
       // Profile props
       'avatar': 'Ảnh hồ sơ (URL)',
       'settings': 'Cài đặt',
       'dark_mode': 'Chế độ nền tối',
       'language': 'Ngôn ngữ',
       'edit_profile': 'Chỉnh sửa hồ sơ',
-      'name': 'Tên',
       'save': 'Lưu',
       'cancel': 'Hủy',
       'logout': 'Đăng xuất',
       'logout_toast': 'Hẹn gặp lại !',
+      'guest': 'Khách',
+      'guest_mode':
+          'Bạn đang ở chế độ khách. Hãy đăng nhập để lưu tủ sách và xem BXH.',
+      'login_or_register': 'Đăng nhập / Đăng ký',
+      'login_required': 'Vui lòng đăng nhập để sử dụng tính năng này',
     },
     'en': {
       // Navigation
@@ -42,6 +56,17 @@ class LanguageProvider with ChangeNotifier {
       'home': 'Home',
       'discover': 'Discover',
       'profile': 'Profile',
+
+      // Auth
+      'title_login': 'Login to Sky Book',
+      'title_register': 'Create a new account',
+      'username': 'Username',
+      'passw': 'Password',
+      'repeat_passw': 'Repeat password',
+      'login_btn': 'Login',
+      'register_btn': 'Register',
+      'no_account': 'Don\'t have an account? Register now',
+      'has_account': 'Has an account already? Login now',
 
       // Home
       'featured_books': 'Featured',
@@ -56,11 +81,15 @@ class LanguageProvider with ChangeNotifier {
       'dark_mode': 'Dark Mode',
       'language': 'Language',
       'edit_profile': 'Edit Profile',
-      'name': 'Name',
       'save': 'Save',
       'cancel': 'Cancel',
       'logout': 'Log out',
       'logout_toast': 'See you later !',
+      'guest': 'Guest',
+      'guest_mode':
+          'You are in guest mode. Sign in to save your shelf and view leaderboard.',
+      'login_or_register': 'Sign in / Register',
+      'login_required': 'Please sign in to use this feature',
     },
   };
 

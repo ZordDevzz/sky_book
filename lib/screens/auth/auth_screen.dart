@@ -52,7 +52,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            _isLogin ? 'Đăng nhập' : 'Tạo tài khoản',
+                            _isLogin
+                                ? lang.t('title_login')
+                                : lang.t('title_register'),
                             style: Theme.of(context).textTheme.headlineSmall,
                             textAlign: TextAlign.center,
                           ),
@@ -64,7 +66,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 TextFormField(
                                   controller: _usernameController,
                                   decoration: InputDecoration(
-                                    labelText: lang.t('name'),
+                                    labelText: lang.t('username'),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.trim().isEmpty) {
@@ -77,8 +79,8 @@ class _AuthScreenState extends State<AuthScreen> {
                                 TextFormField(
                                   controller: _passwordController,
                                   obscureText: true,
-                                  decoration: const InputDecoration(
-                                    labelText: 'Mật khẩu',
+                                  decoration: InputDecoration(
+                                    labelText: lang.t('passw'),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.length < 6) {
@@ -92,8 +94,8 @@ class _AuthScreenState extends State<AuthScreen> {
                                   TextFormField(
                                     controller: _confirmPasswordController,
                                     obscureText: true,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Nhập lại mật khẩu',
+                                    decoration: InputDecoration(
+                                      labelText: lang.t('repeat_passw'),
                                     ),
                                     validator: (value) {
                                       if (value != _passwordController.text) {
@@ -129,7 +131,11 @@ class _AuthScreenState extends State<AuthScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : Text(_isLogin ? 'Đăng nhập' : 'Đăng ký'),
+                                : Text(
+                                    _isLogin
+                                        ? lang.t('login_btn')
+                                        : lang.t('register_btn'),
+                                  ),
                           ),
                           const SizedBox(height: 12),
                           TextButton(
@@ -141,8 +147,8 @@ class _AuthScreenState extends State<AuthScreen> {
                             },
                             child: Text(
                               _isLogin
-                                  ? 'Chưa có tài khoản? Đăng ký'
-                                  : 'Đã có tài khoản? Đăng nhập',
+                                  ? lang.t('no_account')
+                                  : lang.t('has_account'),
                             ),
                           ),
                         ],
@@ -174,6 +180,9 @@ class _AuthScreenState extends State<AuthScreen> {
           _usernameController.text.trim(),
           _passwordController.text,
         );
+      }
+      if (mounted) {
+        Navigator.of(context).maybePop();
       }
     } catch (e) {
       setState(() {

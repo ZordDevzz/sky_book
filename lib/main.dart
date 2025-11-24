@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sky_book/navigation/app_navigation.dart';
 import 'package:sky_book/providers_container.dart';
-import 'package:sky_book/screens/auth/auth_screen.dart';
 import 'package:sky_book/services/auth_provider.dart';
 import 'package:sky_book/services/database_service.dart';
 import 'package:sky_book/services/theme_provider.dart';
@@ -43,23 +42,21 @@ class MyApp extends StatelessWidget {
             ),
           );
         } else {
-          return Consumer<AuthProvider>(
-            builder: (context, auth, _) {
-              final themeMode = Provider.of<ThemeProvider>(context).themeMode;
-              final home = auth.isReady
-                  ? (auth.isAuthenticated
-                      ? const AppNavigation()
-                      : const AuthScreen())
-                  : const Scaffold(
-                      body: Center(child: CircularProgressIndicator()),
-                    );
-
+          return Consumer2<ThemeProvider, AuthProvider>(
+            builder: (context, themeProvider, auth, _) {
+              final isReady = auth.isReady;
               return MaterialApp(
                 title: 'Thiên Thư',
                 theme: lightTheme,
                 darkTheme: darkTheme,
-                themeMode: themeMode,
-                home: home,
+                themeMode: themeProvider.themeMode,
+                home: isReady
+                    ? const AppNavigation()
+                    : const Scaffold(
+                        body: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
               );
             },
           );

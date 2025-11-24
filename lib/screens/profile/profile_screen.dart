@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sky_book/screens/auth/auth_screen.dart';
 import 'package:sky_book/screens/profile/settings_screen.dart';
 import 'package:sky_book/services/auth_provider.dart';
 import 'package:sky_book/services/theme_provider.dart';
@@ -42,10 +43,20 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Center(
               child: Text(
-                user?.username ?? 'Khách',
+                user?.username ?? lang.t('guest'),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
+            if (auth.isGuest) ...[
+              const SizedBox(height: 8),
+              Text(
+                lang.t('guest_mode'),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondary,
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
             ElevatedButton.icon(
               icon: const Icon(Icons.edit),
@@ -85,18 +96,26 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ElevatedButton(
-              onPressed: () async {
-                await auth.logout();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(lang.t('logout_toast')),
-                      showCloseIcon: true,
-                    ),
-                  );
-                }
-              },
-              child: Text(lang.t('logout')),
+              onPressed: auth.isGuest
+                  ? () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const AuthScreen()),
+                      );
+                    }
+                  : () async {
+                      await auth.logout();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(lang.t('logout_toast')),
+                            showCloseIcon: true,
+                          ),
+                        );
+                      }
+                    },
+              child: Text(
+                auth.isGuest ? lang.t('login_or_register') : lang.t('logout'),
+              ),
             ),
           ],
         ),
