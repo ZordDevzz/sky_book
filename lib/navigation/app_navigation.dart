@@ -5,6 +5,7 @@ import 'package:sky_book/screens/home/home_screen.dart';
 import 'package:sky_book/screens/leaderboard/leaderboard_screen.dart';
 import 'package:sky_book/screens/profile/profile_screen.dart';
 import 'package:sky_book/screens/shelf/shelf_screen.dart';
+import 'package:sky_book/services/auth_provider.dart';
 import 'package:sky_book/services/language_provider.dart';
 
 class AppNavigation extends StatefulWidget {
