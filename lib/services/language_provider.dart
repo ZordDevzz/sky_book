@@ -18,8 +18,10 @@ class LanguageProvider with ChangeNotifier {
       'featured_books': 'Truyện Hot Tuần',
       'new_releases': 'Truyện mới',
       'recommended_for_you': 'Dựa trên sở thích của bạn',
-      'popular_authors': 'Tác giả nổi tiếng',
+      'popular_authors': 'Tác giả được tìm đọc nhiều nhất',
       'no_books_found': 'Không tìm thấy truyện nào',
+      'book_rolete': 'Đọc một truyện ngẫu nhiên',
+
 
       // Profile props
       'avatar': 'Ảnh hồ sơ (URL)',

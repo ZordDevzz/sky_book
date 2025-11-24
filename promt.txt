@@ -1,20 +1,6 @@
-**Context:** I am building a mobile novel reader application using Flutter. I need to integrate a PostgreSQL database as the backend data source.
-
-**Resources:**
-1.  **Schema:** The database structure is defined in the file `/assets/data_scheme.sql`. It includes tables for `users`, `author`, `book`, `chapter`, `tag`, `book_tag`, and `shelf`.
-2.  **Configuration:** The PostgreSQL connection string is stored in a `.env` file located at the project root directory.
-
-**Task:**
-Please implement the database integration layer for my Flutter project based on the provided resources.
-
-**Requirements:**
-1.  **Dependencies:** Suggest the necessary packages to add to `pubspec.yaml` (e.g., `postgres`, `flutter_dotenv`, `uuid`).
-2.  **Data Models:** Generate Dart data models (classes) for all tables defined in `data_scheme.sql`. 
-    * Ensure proper type mapping (e.g., UUID to String, TIMESTAMPTZ to DateTime).
-    * Include `fromJson` and `toJson` methods.
-3.  **Database Service:** Create a singleton `DatabaseService` class that:
-    * Loads the connection string from the `.env` file.
-    * Establishes and manages the connection to the PostgreSQL database.
-4.  **Repositories:** Create a basic repository pattern example for the `Book` and `Chapter` tables to demonstrate how to query data (e.g., `getBooks`, `getChapterContent`).
-
-**Note:** Ensure the code handles asynchronous operations and potential connection errors gracefully.
+tạo một listview cho new_releases book ở home_screen 
+	- listview này cuộn dọc, không cuộn ngang
+	- có thumbnail thu nhỏ dở đầu mỗi item
+	- tilte ngay sau thumbnail
+	- phía dưới tilte là 2 text cho author và release_date theo kiểu space_between. thêm icon vào 2 thông tin này nếu có thể.
+Hãy thêm vào context các tệp model, reposistory và provider liên quan

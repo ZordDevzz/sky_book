@@ -60,14 +60,19 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      lang.t(
-                        'featured_books',
-                      ), // Assuming 'featured_books' key exists in language provider
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      children: [
+                        Text(
+                          lang.t('featured_books'),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Icon(Icons.whatshot, color: Colors.amber),
+                        Icon(Icons.whatshot, color: Colors.amber),
+                        Icon(Icons.whatshot, color: Colors.amber),
+                      ],
                     ),
                   ),
                   SizedBox(
@@ -184,6 +189,127 @@ class HomeScreen extends StatelessWidget {
                           ),
                   ),
                   Divider(color: Colors.grey.withAlpha(100), thickness: 1.0),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Text(
+                          lang.t('new_releases'),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  provider.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : provider.newReleaseBooks.isEmpty
+                      ? Center(child: Text(lang.t('no_books_found')))
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: provider.newReleaseBooks.length,
+                          itemBuilder: (context, index) {
+                            final book = provider.newReleaseBooks[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 4.0,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 60,
+                                      height: 80,
+                                      child: book.coverImageUrl != null
+                                          ? ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(4.0),
+                                              child: Image.asset(
+                                                "assets/images/thumbnails/${book.coverImageUrl!}",
+                                                fit: BoxFit.cover,
+                                              ),
+                                            )
+                                          : const Icon(Icons.book),
+                                    ),
+                                    const SizedBox(width: 16.0),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            book.title,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16.0,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 8.0),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.person,
+                                                    size: 14.0,
+                                                    color: Colors.grey,
+                                                  ),
+                                                  const SizedBox(width: 4.0),
+                                                  Text(
+                                                    book.author?.name ??
+                                                        'Unknown',
+                                                    style: const TextStyle(
+                                                      fontSize: 12.0,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.calendar_today,
+                                                    size: 14.0,
+                                                    color: Colors.grey,
+                                                  ),
+                                                  const SizedBox(width: 4.0),
+                                                  Text(
+                                                    book.releaseDate != null
+                                                        ? "${book.releaseDate!.year}-${book.releaseDate!.month.toString().padLeft(2, '0')}-${book.releaseDate!.day.toString().padLeft(2, '0')}"
+                                                        : 'N/A',
+                                                    style: const TextStyle(
+                                                      fontSize: 12.0,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                  Divider(color: Colors.grey.withAlpha(100), thickness: 1.0),
+                  Padding(padding: const EdgeInsets.all(16.0)),
+                  ElevatedButton(
+                    onPressed: () {},
+                    child: Text(lang.t('book_rolete')),
+                  ),
                 ],
               ),
             ),
