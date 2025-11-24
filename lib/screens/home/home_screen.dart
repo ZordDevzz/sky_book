@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sky_book/screens/book_details/book_details_screen.dart';
 import 'package:sky_book/screens/home/home_provider.dart';
 import 'package:sky_book/services/language_provider.dart';
 
@@ -96,7 +97,12 @@ class HomeScreen extends StatelessWidget {
                                   ),
                                   child: InkWell(
                                     onTap: () {
-                                      // Navigate to book details
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => BookDetailsScreen(bookId: book.bookId),
+                                        ),
+                                      );
                                     },
                                     child: Column(
                                       crossAxisAlignment:
@@ -213,92 +219,102 @@ class HomeScreen extends StatelessWidget {
                           itemCount: provider.newReleaseBooks.length,
                           itemBuilder: (context, index) {
                             final book = provider.newReleaseBooks[index];
-                            return Card(
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 16.0,
-                                vertical: 4.0,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 60,
-                                      height: 80,
-                                      child: book.coverImageUrl != null
-                                          ? ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(4.0),
-                                              child: Image.asset(
-                                                "assets/images/thumbnails/${book.coverImageUrl!}",
-                                                fit: BoxFit.cover,
-                                              ),
-                                            )
-                                          : const Icon(Icons.book),
-                                    ),
-                                    const SizedBox(width: 16.0),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            book.title,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16.0,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          const SizedBox(height: 8.0),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.person,
-                                                    size: 14.0,
-                                                    color: Colors.grey,
-                                                  ),
-                                                  const SizedBox(width: 4.0),
-                                                  Text(
-                                                    book.author?.name ??
-                                                        'Unknown',
-                                                    style: const TextStyle(
-                                                      fontSize: 12.0,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.calendar_today,
-                                                    size: 14.0,
-                                                    color: Colors.grey,
-                                                  ),
-                                                  const SizedBox(width: 4.0),
-                                                  Text(
-                                                    book.releaseDate != null
-                                                        ? "${book.releaseDate!.year}-${book.releaseDate!.month.toString().padLeft(2, '0')}-${book.releaseDate!.day.toString().padLeft(2, '0')}"
-                                                        : 'N/A',
-                                                    style: const TextStyle(
-                                                      fontSize: 12.0,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                            return InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BookDetailsScreen(bookId: book.bookId),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                  vertical: 4.0,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 60,
+                                        height: 80,
+                                        child: book.coverImageUrl != null
+                                            ? ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(4.0),
+                                                child: Image.asset(
+                                                  "assets/images/thumbnails/${book.coverImageUrl!}",
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )
+                                            : const Icon(Icons.book),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 16.0),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              book.title,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16.0,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 8.0),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.person,
+                                                      size: 14.0,
+                                                      color: Colors.grey,
+                                                    ),
+                                                    const SizedBox(width: 4.0),
+                                                    Text(
+                                                      book.author?.name ??
+                                                          'Unknown',
+                                                      style: const TextStyle(
+                                                        fontSize: 12.0,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.calendar_today,
+                                                      size: 14.0,
+                                                      color: Colors.grey,
+                                                    ),
+                                                    const SizedBox(width: 4.0),
+                                                    Text(
+                                                      book.releaseDate != null
+                                                          ? "${book.releaseDate!.year}-${book.releaseDate!.month.toString().padLeft(2, '0')}-${book.releaseDate!.day.toString().padLeft(2, '0')}"
+                                                          : 'N/A',
+                                                      style: const TextStyle(
+                                                        fontSize: 12.0,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
