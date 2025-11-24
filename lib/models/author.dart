@@ -1,13 +1,8 @@
-import 'package:uuid/uuid.dart';
-
 class Author {
   String authorId;
   String name;
 
-  Author({
-    required this.authorId,
-    required this.name,
-  });
+  Author({required this.authorId, required this.name});
 
   factory Author.fromJson(Map<String, dynamic> json) {
     return Author(
@@ -17,9 +12,6 @@ class Author {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'author_id': authorId,
-      'name': name,
-    };
+    return {'author_id': authorId, 'name': name};
   }
 }

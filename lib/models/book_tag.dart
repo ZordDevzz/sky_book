@@ -1,13 +1,8 @@
-import 'package:uuid/uuid.dart';
-
 class BookTag {
   String bookId;
   int tagId;
 
-  BookTag({
-    required this.bookId,
-    required this.tagId,
-  });
+  BookTag({required this.bookId, required this.tagId});
 
   factory BookTag.fromJson(Map<String, dynamic> json) {
     return BookTag(
@@ -17,9 +12,6 @@ class BookTag {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'book_id': bookId,
-      'tag_id': tagId,
-    };
+    return {'book_id': bookId, 'tag_id': tagId};
   }
 }

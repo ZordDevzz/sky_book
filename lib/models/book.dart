@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 class Book {
   String bookId;
   String title;
@@ -52,7 +50,10 @@ class Book {
       'author_id': authorId,
       'description': description,
       'cover_image_url': coverImageUrl,
-      'release_date': releaseDate?.toIso8601String().split('T').first, // DATE only
+      'release_date': releaseDate
+          ?.toIso8601String()
+          .split('T')
+          .first, // DATE only
       'status': status,
       'rating': rating,
       'view_count_total': viewCountTotal,

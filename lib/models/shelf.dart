@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 class Shelf {
   String userId;
   String bookId;

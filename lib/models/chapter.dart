@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 class Chapter {
   String chapterId;
   String bookId;
