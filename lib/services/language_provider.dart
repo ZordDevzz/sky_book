@@ -15,7 +15,7 @@ class LanguageProvider with ChangeNotifier {
       'profile': 'Hồ sơ',
 
       // Home
-      'featured:' : 'Truyện Hot',
+      'featured:': 'Truyện Hot',
       'new_releases': 'Truyện mới',
       'recommended_for_you': 'Dựa trên sở thích của bạn',
       'popular_authors': 'Tác giả nổi tiếng',
@@ -30,6 +30,7 @@ class LanguageProvider with ChangeNotifier {
       'save': 'Lưu',
       'cancel': 'Hủy',
       'logout': 'Đăng xuất',
+      'logout_toast': 'Hẹn gặp lại !',
     },
     'en': {
       // Navigation
@@ -49,6 +50,7 @@ class LanguageProvider with ChangeNotifier {
       'save': 'Save',
       'cancel': 'Cancel',
       'logout': 'Log out',
+      'logout_toast': 'See you later !',
     },
   };
 

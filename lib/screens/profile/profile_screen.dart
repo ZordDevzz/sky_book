@@ -83,7 +83,7 @@ class ProfileScreen extends StatelessWidget {
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text('Hẹn gặp lại !'),
+                    content: Text(lang.t('logout_toast')),
                     showCloseIcon: true,
                   ),
                 );

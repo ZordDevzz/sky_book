@@ -7,9 +7,11 @@ class BookRepository {
   final DatabaseService _dbService;
   final AuthorRepository _authorRepository;
 
-  BookRepository({required DatabaseService dbService, required AuthorRepository authorRepository})
-      : _dbService = dbService,
-        _authorRepository = authorRepository;
+  BookRepository({
+    required DatabaseService dbService,
+    required AuthorRepository authorRepository,
+  }) : _dbService = dbService,
+       _authorRepository = authorRepository;
 
   Future<List<Book>> getAllBooks() async {
     final Connection connection = _dbService.connection;
@@ -39,20 +41,19 @@ class BookRepository {
   }
 
   Future<List<Book>> getAllBooksWithAuthors() async {
-    List<Book> books = await getAllBooks();
-    List<Future<void>> authorFutures = [];
+    final books = await getAllBooks();
+    if (books.isEmpty) return books;
 
-    for (var book in books) {
-      authorFutures.add(_authorRepository.getAuthorById(book.authorId).then((author) {
-        print("Fetched author for book ${book.title}: ${author?.name}");
-        book.author = author;
-      }));
+    final authorIds = books.map((b) => b.authorId).toSet().toList();
+
+    final authorsById = await _authorRepository.getAuthorsByIds(authorIds);
+
+    for (final book in books) {
+      book.author = authorsById[book.authorId];
     }
 
-    await Future.wait(authorFutures);
     return books;
   }
-
 
   Future<Book?> getBookById(String id) async {
     final Connection connection = _dbService.connection;
