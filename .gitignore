@@ -41,3 +41,4 @@ app.*.map.json
 .vscode
 .dart_tool
 /.env
+/assets/.env
