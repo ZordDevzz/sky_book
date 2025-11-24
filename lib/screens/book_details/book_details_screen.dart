@@ -67,8 +67,8 @@ class _BookDetailsView extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      colorScheme.background,
-                      colorScheme.background.withOpacity(0.92),
+                      colorScheme.surface,
+                      colorScheme.surface.withOpacity(0.92),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -104,7 +104,7 @@ class _Header extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 8, 16, 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.background.withOpacity(0.92),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.92),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -162,7 +162,7 @@ class _Body extends StatelessWidget {
                             fit: BoxFit.cover,
                           )
                         : Container(
-                            color: colorScheme.surfaceVariant,
+                            color: colorScheme.surfaceContainerHighest,
                             child: const Icon(Icons.book, size: 48),
                           ),
                   ),
@@ -316,7 +316,7 @@ class _ChapterHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                '${provider.chapters.length} chương',
+                '${provider.chapters.length} ${lang.t('chapter')}',
                 style: TextStyle(
                   color: colorScheme.primary,
                   fontWeight: FontWeight.w700,
@@ -334,14 +334,14 @@ class _ChapterHeader extends StatelessWidget {
             ),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          hint: const Text('Chọn chương'),
+          hint: Text(lang.t('select_chapter')),
           items: provider.chapters
               .asMap()
               .entries
               .map(
                 (e) => DropdownMenuItem<int>(
                   value: e.key,
-                  child: Text('Chương ${e.key + 1}'),
+                  child: Text('${lang.t('chapter')} ${e.key + 1}'),
                 ),
               )
               .toList(),

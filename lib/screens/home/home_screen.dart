@@ -573,7 +573,7 @@ class _NewReleasesSection extends StatelessWidget {
                                     fit: BoxFit.cover,
                                   )
                                 : Container(
-                                    color: colorScheme.surfaceVariant,
+                                    color: colorScheme.surfaceContainerHighest,
                                     child: const Icon(Icons.book),
                                   ),
                           ),

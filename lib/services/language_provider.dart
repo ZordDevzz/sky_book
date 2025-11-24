@@ -44,7 +44,9 @@ class LanguageProvider with ChangeNotifier {
       'read_from_first': 'Đọc từ đầu',
       'description': 'Mô tả',
       'chapters': 'Tất cả chương',
+      'chapter': 'Chương',
       'no_description_available': 'Không có mô tả',
+      'select_chapter': 'Chọn chương',
 
       // Discover
       'discover_subtitle': 'Tìm kiếm, lọc và khám phá truyện mới',
@@ -115,10 +117,12 @@ class LanguageProvider with ChangeNotifier {
       // Book details
       'details': 'Novel details',
       'add_to_shelf': 'Add to shelf',
-      'read_from_first': 'Read from beginning',
+      'read_from_first': 'Start reading',
       'description': 'Description',
       'chapters': 'Chapters',
+      'chapter': 'Chapter',
       'no_description_available': 'No description available',
+      'select_chapter': 'Select chapters',
 
       // Discover
       'discover_subtitle': 'Search, filter and explore new novels',

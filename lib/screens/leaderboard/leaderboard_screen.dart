@@ -38,18 +38,22 @@ class LeaderboardScreen extends StatelessWidget {
                         child: provider.isLoading
                             ? const Center(child: CircularProgressIndicator())
                             : ListView.builder(
-                                padding:
-                                    const EdgeInsets.fromLTRB(12, 10, 12, 16),
+                                padding: const EdgeInsets.fromLTRB(
+                                  12,
+                                  10,
+                                  12,
+                                  16,
+                                ),
                                 itemCount: provider.entries.length,
                                 itemBuilder: (context, index) {
                                   final book = provider.entries[index];
                                   final count = switch (provider.range) {
                                     LeaderboardRange.weekly =>
-                                        '${provider.countFor(book)} ${lang.t('views_week')}',
+                                      '${provider.countFor(book)} ${lang.t('views_week')}',
                                     LeaderboardRange.monthly =>
-                                        '${provider.countFor(book)} ${lang.t('views_month')}',
+                                      '${provider.countFor(book)} ${lang.t('views_month')}',
                                     LeaderboardRange.allTime =>
-                                        '${provider.countFor(book)} ${lang.t('views_total')}',
+                                      '${provider.countFor(book)} ${lang.t('views_total')}',
                                   };
                                   return _EntryCard(
                                     rank: index + 1,
@@ -70,9 +74,9 @@ class LeaderboardScreen extends StatelessWidget {
                 message: lang.t('login_required'),
                 actionLabel: lang.t('login_or_register'),
                 onAction: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const AuthScreen()),
-                  );
+                  Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => const AuthScreen()));
                 },
               ),
           ],
@@ -171,17 +175,12 @@ class _Header extends StatelessWidget {
         children: [
           Text(
             lang.t('leaderboard'),
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
           Text(
             lang.t('leaderboard_subtitle'),
-            style: TextStyle(
-              color: colorScheme.onSurface.withOpacity(0.7),
-            ),
+            style: TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -229,7 +228,7 @@ class _EntryCard extends StatelessWidget {
           ]
         : [
             colorScheme.surface,
-            colorScheme.surfaceVariant.withOpacity(0.6),
+            colorScheme.surfaceContainerHighest.withOpacity(0.6),
           ];
 
     return Container(
@@ -275,7 +274,7 @@ class _EntryCard extends StatelessWidget {
                         fit: BoxFit.cover,
                       )
                     : Container(
-                        color: colorScheme.surfaceVariant,
+                        color: colorScheme.surfaceContainerHighest,
                         child: const Icon(Icons.book),
                       ),
               ),
@@ -363,17 +362,11 @@ class _RankBadge extends StatelessWidget {
     return Container(
       width: 36,
       height: 36,
-      decoration: BoxDecoration(
-        color: bg,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
       alignment: Alignment.center,
       child: Text(
         '$rank',
-        style: TextStyle(
-          color: fg,
-          fontWeight: FontWeight.w800,
-        ),
+        style: TextStyle(color: fg, fontWeight: FontWeight.w800),
       ),
     );
   }
