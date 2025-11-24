@@ -22,11 +22,15 @@ class LanguageProvider with ChangeNotifier {
       'repeat_passw': 'Nhập lại mật khẩu',
       'login_btn': 'Đăng nhập',
       'register_btn': 'Đăng ký',
+      'username_validator': 'Vui lòng nhập tên đăng nhập',
+      'passw_validator': 'Mật khẩu tối thiểu 6 ký tự',
+      'repeat_passw_validator': 'Mật khẩu không khớp',
       'no_account': 'Chưa có tài khoản? Đăng ký ngay',
       'has_account': 'Đã có tài khoản? Đăng nhập ngay',
 
       // Home
       'featured_books': 'Truyện Hot Tuần',
+      'featured_muted': 'Top trending trong tuần',
       'new_releases': 'Truyện mới',
       'recommended_for_you': 'Dựa trên sở thích của bạn',
       'popular_authors': 'Tác giả được tìm đọc nhiều nhất',
@@ -45,7 +49,7 @@ class LanguageProvider with ChangeNotifier {
       'logout_toast': 'Hẹn gặp lại !',
       'guest': 'Khách',
       'guest_mode':
-          'Bạn đang ở chế độ khách. Hãy đăng nhập để lưu tủ sách và xem BXH.',
+          'Bạn đang ở chế độ khách. Hãy đăng nhập để lưu truyện và xem BXH.',
       'login_or_register': 'Đăng nhập / Đăng ký',
       'login_required': 'Vui lòng đăng nhập để sử dụng tính năng này',
     },
@@ -65,11 +69,15 @@ class LanguageProvider with ChangeNotifier {
       'repeat_passw': 'Repeat password',
       'login_btn': 'Login',
       'register_btn': 'Register',
+      'username_validator': 'Please input username',
+      'passw_validator': 'Password must be at least 6 characters long',
+      'repeat_passw_validator': 'Passwords do not match',
       'no_account': 'Don\'t have an account? Register now',
       'has_account': 'Has an account already? Login now',
 
       // Home
-      'featured_books': 'Featured',
+      'featured_books': 'Featured Novels',
+      'featured_muted': 'Top trending this week',
       'new_releases': 'New releases',
       'recommended_for_you': 'Recommended',
       'popular_authors': 'Popular authors',
@@ -87,7 +95,7 @@ class LanguageProvider with ChangeNotifier {
       'logout_toast': 'See you later !',
       'guest': 'Guest',
       'guest_mode':
-          'You are in guest mode. Sign in to save your shelf and view leaderboard.',
+          'You are in guest mode. Sign in to save your novels and view leaderboard.',
       'login_or_register': 'Sign in / Register',
       'login_required': 'Please sign in to use this feature',
     },

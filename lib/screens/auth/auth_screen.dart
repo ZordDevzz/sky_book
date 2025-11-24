@@ -70,7 +70,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   ),
                                   validator: (value) {
                                     if (value == null || value.trim().isEmpty) {
-                                      return 'Nhập tên đăng nhập';
+                                      return lang.t('username_validator');
                                     }
                                     return null;
                                   },
@@ -84,7 +84,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   ),
                                   validator: (value) {
                                     if (value == null || value.length < 6) {
-                                      return 'Mật khẩu tối thiểu 6 ký tự';
+                                      return lang.t('passw_validator');
                                     }
                                     return null;
                                   },
@@ -99,7 +99,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                     ),
                                     validator: (value) {
                                       if (value != _passwordController.text) {
-                                        return 'Mật khẩu không khớp';
+                                        return lang.t('repeat_passw_validator');
                                       }
                                       return null;
                                     },
