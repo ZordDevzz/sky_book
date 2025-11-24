@@ -100,7 +100,7 @@ class HomeScreen extends StatelessWidget {
                                         ClipRRect(
                                           borderRadius:
                                               const BorderRadius.vertical(
-                                                top: Radius.circular(8.0),
+                                                bottom: Radius.circular(8.0),
                                               ),
                                           child: book.coverImageUrl != null
                                               ? Image.asset(

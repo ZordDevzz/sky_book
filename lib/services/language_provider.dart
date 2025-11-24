@@ -41,6 +41,13 @@ class LanguageProvider with ChangeNotifier {
       'discover': 'Discover',
       'profile': 'Profile',
 
+      // Home
+      'featured_books': 'Featured',
+      'new_releases': 'New releases',
+      'recommended_for_you': 'Recommended',
+      'popular_authors': 'Popular authors',
+      'no_books_found': 'Couldn\'t find novels',
+
       // Profile props
       'avatar': 'Avatar (URL)',
       'settings': 'Settings',

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sky_book/screens/profile/profile_provider.dart';
 import 'package:sky_book/screens/profile/settings_screen.dart';
+import 'package:sky_book/services/auth_provider.dart';
 import 'package:sky_book/services/theme_provider.dart';
 import 'package:sky_book/services/language_provider.dart';
 
@@ -10,7 +10,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profile = Provider.of<ProfileProvider>(context);
+    final auth = Provider.of<AuthProvider>(context);
+    final user = auth.currentUser;
     final lang = Provider.of<LanguageProvider>(context);
 
     return Scaffold(
@@ -23,13 +24,15 @@ class ProfileScreen extends StatelessWidget {
             Center(
               child: CircleAvatar(
                 radius: 48,
-                backgroundImage: profile.pfpUrl != null
-                    ? NetworkImage(profile.pfpUrl!)
+                backgroundImage:
+                    user?.pfpUrl != null && user!.pfpUrl!.trim().isNotEmpty
+                    ? AssetImage('assets/images/pfp/${user.pfpUrl!}')
+                          as ImageProvider
                     : null,
-                child: profile.pfpUrl == null
+                child: user?.pfpUrl == null || user!.pfpUrl!.trim().isEmpty
                     ? Text(
-                        profile.name.isNotEmpty
-                            ? profile.name[0].toUpperCase()
+                        (user?.username ?? 'U').isNotEmpty
+                            ? (user?.username ?? 'U')[0].toUpperCase()
                             : 'U',
                         style: const TextStyle(fontSize: 36),
                       )
@@ -39,7 +42,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Center(
               child: Text(
-                profile.name,
+                user?.username ?? 'Khách',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
@@ -47,7 +50,9 @@ class ProfileScreen extends StatelessWidget {
             ElevatedButton.icon(
               icon: const Icon(Icons.edit),
               label: Text(lang.t('edit_profile')),
-              onPressed: () => _showEditDialog(context, profile, lang),
+              onPressed: user == null
+                  ? null
+                  : () => _showEditDialog(context, auth, lang),
             ),
             const SizedBox(height: 12),
             ListTile(
@@ -80,13 +85,16 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(lang.t('logout_toast')),
-                    showCloseIcon: true,
-                  ),
-                );
+              onPressed: () async {
+                await auth.logout();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(lang.t('logout_toast')),
+                      showCloseIcon: true,
+                    ),
+                  );
+                }
               },
               child: Text(lang.t('logout')),
             ),
@@ -96,13 +104,13 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showEditDialog(
-    BuildContext context,
-    ProfileProvider profile,
-    dynamic lang,
-  ) {
-    final nameController = TextEditingController(text: profile.name);
-    final avatarController = TextEditingController(text: profile.pfpUrl ?? '');
+  void _showEditDialog(BuildContext context, AuthProvider auth, dynamic lang) {
+    final nameController = TextEditingController(
+      text: auth.currentUser?.username ?? '',
+    );
+    final avatarController = TextEditingController(
+      text: auth.currentUser?.pfpUrl ?? '',
+    );
 
     showDialog(
       context: context,
@@ -119,14 +127,6 @@ class ProfileScreen extends StatelessWidget {
                   labelText: lang.t('name'),
                 ),
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: avatarController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: lang.t('avatar'),
-                ),
-              ),
             ],
           ),
           actions: [
@@ -136,12 +136,18 @@ class ProfileScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                await profile.saveProfile(
+                await auth.updateProfile(
                   username: nameController.text.trim(),
                   pfpUrl: avatarController.text.trim().isEmpty
                       ? null
                       : avatarController.text.trim(),
                 );
+                if (auth.errorMessage != null) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(auth.errorMessage!)));
+                  return;
+                }
                 if (ctx.mounted) Navigator.of(ctx).pop();
               },
               child: Text(lang.t('save')),
