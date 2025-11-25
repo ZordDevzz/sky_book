@@ -1,3 +1,4 @@
+import 'package:sky_book/screens/reader/reader_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sky_book/models/book.dart';
@@ -384,7 +385,16 @@ class _ChaptersList extends StatelessWidget {
         return InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            // TODO: navigate to reader
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ReaderScreen(
+                  book: provider.book,
+                  chapters: provider.chapters,
+                  currentChapter: chapter,
+                ),
+              ),
+            );
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),

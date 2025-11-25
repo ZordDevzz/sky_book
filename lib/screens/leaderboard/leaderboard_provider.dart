@@ -9,7 +9,7 @@ class LeaderboardProvider with ChangeNotifier {
     fetchLeaderboard();
   }
 
-  BookRepository _bookRepository;
+  final BookRepository _bookRepository;
   List<Book> _entries = [];
   bool _isLoading = false;
   LeaderboardRange _range = LeaderboardRange.weekly;
@@ -62,7 +62,5 @@ class LeaderboardProvider with ChangeNotifier {
     }
   }
 
-  void updateRepository(BookRepository repo) {
-    _bookRepository = repo;
-  }
+
 }

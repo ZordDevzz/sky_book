@@ -10,7 +10,7 @@ class DiscoverProvider with ChangeNotifier {
     fetchBooks();
   }
 
-  BookRepository _bookRepository;
+  final BookRepository _bookRepository;
 
   List<Book> _allBooks = [];
   List<Book> _filteredBooks = [];
@@ -95,7 +95,5 @@ class DiscoverProvider with ChangeNotifier {
     });
   }
 
-  void updateRepository(BookRepository repo) {
-    _bookRepository = repo;
-  }
+
 }

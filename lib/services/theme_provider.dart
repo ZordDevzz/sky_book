@@ -4,11 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ThemeProvider with ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.light;
   final String _themePreferenceKey = 'theme_preference';
+  late final Future<void> initializationFuture;
 
   ThemeMode get themeMode => _themeMode;
 
   ThemeProvider() {
-    _loadThemePreference();
+    initializationFuture = _loadThemePreference();
   }
 
   void toggleTheme() {
@@ -22,7 +23,6 @@ class ThemeProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final themeIndex = prefs.getInt(_themePreferenceKey) ?? 0;
     _themeMode = ThemeMode.values[themeIndex];
-    notifyListeners();
   }
 
   Future<void> _saveThemePreference() async {

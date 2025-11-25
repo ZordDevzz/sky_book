@@ -4,9 +4,11 @@ import 'package:sky_book/models/user.dart';
 import 'package:sky_book/repositories/user_repository.dart';
 
 class AuthProvider with ChangeNotifier {
+  late final Future<void> initializationFuture;
+
   AuthProvider({required UserRepository userRepository})
       : _userRepository = userRepository {
-    _restoreSession();
+    initializationFuture = _restoreSession();
   }
 
   static const String _sessionKey = 'current_user_id';
@@ -96,7 +98,6 @@ class AuthProvider with ChangeNotifier {
       _guestMode = true;
     }
     _restoringSession = false;
-    notifyListeners();
   }
 
   Future<void> _performAuthAction(

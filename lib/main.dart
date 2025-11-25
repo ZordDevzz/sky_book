@@ -17,46 +17,56 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Future<void>? _initFuture;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initFuture == null) {
+      final dbService = Provider.of<DatabaseService>(context, listen: false);
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      _initFuture = Future.wait([
+        dbService.connectionFuture,
+        themeProvider.initializationFuture,
+        authProvider.initializationFuture,
+      ]);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Provider.of<DatabaseService>(context, listen: false).connectionFuture,
+      future: _initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
+            home: Scaffold(body: Center(child: CircularProgressIndicator())),
           );
         } else if (snapshot.hasError) {
           return MaterialApp(
             home: Scaffold(
-              body: Center(
-                child: Text('Error initializing database: ${snapshot.error}'),
-              ),
-            ),
+                body: Center(
+                    child: Text('Error initializing app: ${snapshot.error}'))),
           );
         } else {
-          return Consumer2<ThemeProvider, AuthProvider>(
-            builder: (context, themeProvider, auth, _) {
-              final isReady = auth.isReady;
+          return Consumer<ThemeProvider>(
+            builder: (context, themeProvider, _) {
               return MaterialApp(
                 title: 'Thiên Thư',
                 theme: lightTheme,
                 darkTheme: darkTheme,
                 themeMode: themeProvider.themeMode,
-                home: isReady
-                    ? const AppNavigation()
-                    : const Scaffold(
-                        body: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
+                home: const AppNavigation(),
               );
             },
           );
