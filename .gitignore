@@ -43,3 +43,4 @@ app.*.map.json
 .env*
 /assets/.env
 .zed
+/promt.txt

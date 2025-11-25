@@ -14,8 +14,7 @@ class UserRepository {
   final Uuid _uuid = const Uuid();
 
   Future<User?> getUserById(String userId) async {
-    await _dbService.connectionFuture;
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     final results = await connection.execute(
       Sql.named(
         '''
@@ -33,8 +32,7 @@ class UserRepository {
   }
 
   Future<User?> getUserByUsername(String username) async {
-    await _dbService.connectionFuture;
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     final results = await connection.execute(
       Sql.named(
         '''
@@ -60,8 +58,7 @@ class UserRepository {
       throw Exception('Tên người dùng đã tồn tại');
     }
 
-    await _dbService.connectionFuture;
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     final now = DateTime.now();
     final userId = _uuid.v4();
     final hashedPassword = _hashPassword(password);
@@ -107,8 +104,7 @@ class UserRepository {
     required String username,
     String? pfpUrl,
   }) async {
-    await _dbService.connectionFuture;
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     final results = await connection.execute(
       Sql.named(
         '''

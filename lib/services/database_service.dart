@@ -3,11 +3,13 @@ import 'package:postgres/postgres.dart';
 
 class DatabaseService {
   DatabaseService() {
-    connectionFuture = _connect();
+    _connectionFuture = _connect();
   }
 
   Connection? _connection;
-  late final Future<void> connectionFuture;
+  late Future<void> _connectionFuture;
+
+  bool get isConnected => _connection != null && _connection?.isOpen == true;
 
   Future<void> _connect() async {
     await dotenv.load(fileName: ".env");
@@ -33,6 +35,9 @@ class DatabaseService {
           username: dbUser,
           password: dbPassword,
         ),
+        settings: const ConnectionSettings(
+          connectTimeout: Duration(seconds: 15),
+        ),
       );
       print('Database connection opened successfully.');
     } catch (e) {
@@ -43,14 +48,19 @@ class DatabaseService {
   }
 
   Future<void> dispose() async {
-    if (_connection != null) {
+    if (isConnected) {
       await _connection!.close();
       _connection = null;
       print('Database connection closed.');
     }
   }
 
-  Connection get connection {
+  Future<Connection> getConnection() async {
+    if (!isConnected) {
+      print('Connection is not open. Reconnecting...');
+      _connectionFuture = _connect();
+      await _connectionFuture;
+    }
     if (_connection == null) {
       throw Exception(
         'Database not connected. The connection might still be initializing or it failed.',
@@ -58,4 +68,6 @@ class DatabaseService {
     }
     return _connection!;
   }
+
+  Future<void> get connectionFuture => _connectionFuture;
 }

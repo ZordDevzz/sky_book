@@ -18,7 +18,7 @@ class BookRepository {
         _tagRepository = tagRepository;
 
   Future<List<Book>> getAllBooks() async {
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     print("Getting all books from database...");
     final List<List<dynamic>> results = await connection.execute(
       Sql.named('SELECT * FROM book'),
@@ -71,7 +71,7 @@ class BookRepository {
   }
 
   Future<Book?> getBookById(String id) async {
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     final List<List<dynamic>> results = await connection.execute(
       Sql.named('SELECT * FROM book WHERE book_id = @id'),
       parameters: {'id': id},
@@ -103,7 +103,7 @@ class BookRepository {
   }
 
   Future<void> addBook(Book book) async {
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     await connection.execute(
       Sql.named('''
       INSERT INTO book (book_id, title, author_id, description, cover_image_url, release_date, status, rating, view_count_total, view_count_monthly, view_count_weekly)

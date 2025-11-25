@@ -8,7 +8,7 @@ class ChapterRepository {
   ChapterRepository({required DatabaseService dbService}) : _dbService = dbService;
 
   Future<List<Chapter>> getChaptersForBook(String bookId) async {
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     final List<List<dynamic>> results = await connection.execute(
       Sql.named(
         'SELECT * FROM chapter WHERE book_id = @book_id ORDER BY chapter_index',
@@ -30,7 +30,7 @@ class ChapterRepository {
   }
 
   Future<Chapter?> getChapterContent(String chapterId) async {
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     final List<List<dynamic>> results = await connection.execute(
       Sql.named(
         'SELECT * FROM chapter WHERE chapter_id = @chapter_id',

@@ -14,7 +14,7 @@ class AuthorRepository {
       return _authorCache[id];
     }
 
-    final Connection connection = _dbService.connection;
+    final Connection connection = await _dbService.getConnection();
     final List<List<dynamic>> results = await connection.execute(
       Sql.named('SELECT author_id, name FROM author WHERE author_id = @id'),
       parameters: {'id': id},
@@ -34,7 +34,7 @@ class AuthorRepository {
   Future<Map<String, Author>> getAuthorsByIds(List<String> ids) async {
     if (ids.isEmpty) return {};
 
-    final connection = _dbService.connection;
+    final connection = await _dbService.getConnection();
 
     final results = await connection.execute(
       Sql.named('''

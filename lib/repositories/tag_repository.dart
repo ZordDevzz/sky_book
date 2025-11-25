@@ -10,7 +10,7 @@ class TagRepository {
   Future<Map<String, List<Tag>>> getTagsForBooks(List<String> bookIds) async {
     if (bookIds.isEmpty) return {};
 
-    final connection = _dbService.connection;
+    final connection = await _dbService.getConnection();
 
     final results = await connection.execute(
       Sql.named('''
