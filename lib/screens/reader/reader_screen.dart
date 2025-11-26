@@ -10,6 +10,7 @@ import 'package:sky_book/repositories/shelf_repository.dart';
 import 'package:sky_book/screens/reader/reader_provider.dart';
 import 'package:sky_book/screens/shelf/shelf_provider.dart'; // Import ShelfProvider
 import 'package:sky_book/services/auth_provider.dart';
+import 'package:sky_book/services/language_provider.dart';
 
 class ReaderScreen extends StatelessWidget {
   const ReaderScreen({
@@ -19,9 +20,9 @@ class ReaderScreen extends StatelessWidget {
     this.chapters,
     this.currentChapter,
   }) : assert(
-          chapterId != null ||
-              (book != null && chapters != null && currentChapter != null),
-        );
+         chapterId != null ||
+             (book != null && chapters != null && currentChapter != null),
+       );
 
   final String? chapterId;
   final Book? book;
@@ -34,14 +35,23 @@ class ReaderScreen extends StatelessWidget {
 
     return ChangeNotifierProvider(
       create: (context) {
-        final chapterRepository =
-            Provider.of<ChapterRepository>(context, listen: false);
-        final bookRepository =
-            Provider.of<BookRepository>(context, listen: false);
-        final shelfRepository =
-            Provider.of<ShelfRepository>(context, listen: false);
+        final chapterRepository = Provider.of<ChapterRepository>(
+          context,
+          listen: false,
+        );
+        final bookRepository = Provider.of<BookRepository>(
+          context,
+          listen: false,
+        );
+        final shelfRepository = Provider.of<ShelfRepository>(
+          context,
+          listen: false,
+        );
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final shelfProvider = Provider.of<ShelfProvider>(context, listen: false); // Get ShelfProvider
+        final shelfProvider = Provider.of<ShelfProvider>(
+          context,
+          listen: false,
+        ); // Get ShelfProvider
 
         if (book != null && chapters != null && currentChapter != null) {
           return ReaderProvider.fromData(
@@ -124,7 +134,11 @@ class _ReaderViewState extends State<_ReaderView> {
     super.dispose();
   }
 
-  void _showSettingsMenu(BuildContext context, ReaderProvider readerProvider) {
+  void _showSettingsMenu(
+    BuildContext context,
+    ReaderProvider readerProvider,
+    LanguageProvider lang,
+  ) {
     setState(() {
       _settingsOpen = true;
       _showControlsOverlay = false;
@@ -137,7 +151,7 @@ class _ReaderViewState extends State<_ReaderView> {
       backgroundColor: Colors.transparent, // Make it transparent
       builder: (_) => ChangeNotifierProvider.value(
         value: readerProvider,
-        child: const _SettingsMenu(),
+        child: _SettingsMenu(lang: lang),
       ),
     ).whenComplete(() {
       if (mounted) {
@@ -161,6 +175,8 @@ class _ReaderViewState extends State<_ReaderView> {
     final textColor = provider.readerDarkMode
         ? (provider.textColor ?? Colors.white)
         : (provider.textColor ?? colorScheme.onSurface);
+
+    final lang = LanguageProvider();
     return Scaffold(
       backgroundColor: bgColor,
       body: provider.isLoading && provider.currentChapter == null
@@ -239,7 +255,8 @@ class _ReaderViewState extends State<_ReaderView> {
                       bottom: 24,
                       right: 16,
                       child: FloatingActionButton(
-                        onPressed: () => _showSettingsMenu(context, provider),
+                        onPressed: () =>
+                            _showSettingsMenu(context, provider, lang),
                         child: const Icon(Icons.settings),
                       ),
                     ),
@@ -273,7 +290,9 @@ class _ReaderViewState extends State<_ReaderView> {
 }
 
 class _SettingsMenu extends StatelessWidget {
-  const _SettingsMenu();
+  const _SettingsMenu({required this.lang});
+
+  final LanguageProvider lang;
 
   void _showColorPicker(
     BuildContext context,
@@ -284,7 +303,7 @@ class _SettingsMenu extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Pick a color'),
+        title: Text(lang.t('pick_color')),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: initialColor,
@@ -296,14 +315,14 @@ class _SettingsMenu extends StatelessWidget {
         actions: <Widget>[
           if (onDefault != null)
             TextButton(
-              child: const Text('Default'),
+              child: Text(lang.t('default')),
               onPressed: () {
                 onDefault();
                 Navigator.of(context).pop();
               },
             ),
           TextButton(
-            child: const Text('Done'),
+            child: Text(lang.t('done')),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -314,6 +333,7 @@ class _SettingsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final readerProvider = Provider.of<ReaderProvider>(context);
+    final lang = Provider.of<LanguageProvider>(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -330,9 +350,12 @@ class _SettingsMenu extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Tùy chỉnh',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Text(
+                  lang.t('reader_settings'),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -350,7 +373,7 @@ class _SettingsMenu extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Cỡ chữ'),
+                  Text(lang.t('font_size')),
                   Row(
                     children: [
                       IconButton(
@@ -372,7 +395,7 @@ class _SettingsMenu extends StatelessWidget {
             const SizedBox(height: 12),
             _SettingTile(
               icon: Icons.format_color_fill,
-              title: 'Màu nền',
+              title: lang.t('background_color'),
               onTap: () => _showColorPicker(
                 context,
                 readerProvider.backgroundColor ??
@@ -385,7 +408,7 @@ class _SettingsMenu extends StatelessWidget {
             ),
             _SettingTile(
               icon: Icons.format_color_text,
-              title: 'Màu chữ',
+              title: lang.t('text_color'),
               onTap: () => _showColorPicker(
                 context,
                 readerProvider.textColor ??

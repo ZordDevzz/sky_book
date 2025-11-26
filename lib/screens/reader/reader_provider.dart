@@ -102,11 +102,11 @@ class ReaderProvider with ChangeNotifier {
   }
 
   void _loadFromData(Book book, List<Chapter> chapters, Chapter currentChapter) {
-    _isLoading = true;
-    notifyListeners();
     _currentBook = book;
     _bookChapters = chapters;
-    _loadChapterById(currentChapter.chapterId);
+    _currentChapter = currentChapter;
+    _isLoading = false;
+    notifyListeners();
     _updateProgress();
   }
 
@@ -137,13 +137,18 @@ class ReaderProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     _currentChapter = await _chapterRepository.getChapterContent(chapterId);
+    if (_currentChapter != null && _bookChapters.isEmpty) {
+      _bookChapters = await _chapterRepository.getChaptersForBook(_currentChapter!.bookId);
+    }
     _isLoading = false;
     notifyListeners();
     _updateProgress();
   }
 
   Future<void> _updateProgress() async {
-    if (_authProvider.currentUser == null || _currentBook == null) return;
+    if (_authProvider.currentUser == null || _currentBook == null || _currentChapter == null) {
+      return;
+    }
     
     // Check from cached ShelfProvider first
     if (_shelfProvider.isBookOnShelf(_currentBook!.bookId)) {

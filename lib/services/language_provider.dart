@@ -28,7 +28,12 @@ class LanguageProvider with ChangeNotifier {
       'no_account': 'Chưa có tài khoản? Đăng ký ngay',
       'has_account': 'Đã có tài khoản? Đăng nhập ngay',
 
+      // Shelf
+      'added_to_shelf': 'Đã lưu',
+      'continue_reading': 'Tiếp tục đọc',
+      'remove_from_shelf': 'Xoá khỏi tủ sách',
       'shelf_empty': 'Tủ sách của bạn trống',
+      'has_read': 'Đã đọc',
 
       // Home
       'featured_books': 'Truyện Hot Tuần',
@@ -49,6 +54,15 @@ class LanguageProvider with ChangeNotifier {
       'chapter': 'Chương',
       'no_description_available': 'Không có mô tả',
       'select_chapter': 'Chọn chương',
+
+      // Reader
+      'font_size': 'Cỡ chữ',
+      'background_color': 'Màu nền',
+      'text_color': 'Màu chữ',
+      'reader_settings': 'Tùy chỉnh đọc',
+      'pick_color': 'Chọn màu',
+      'default': 'Mặc định',
+      'done': 'Xong',
 
       // Discover
       'discover_subtitle': 'Tìm kiếm, lọc và khám phá truyện mới',
@@ -112,7 +126,12 @@ class LanguageProvider with ChangeNotifier {
       'no_account': 'Don\'t have an account? Register now',
       'has_account': 'Has an account already? Login now',
 
+      // Shelf
+      'added_to_shelf': 'Added to shelf',
+      'continue_reading': 'Continue reading',
+      'remove_from_shelf': 'Remove from shelf',
       'shelf_empty': 'Your shelf is empty',
+      'has_read': 'Has read',
 
       // Home
       'featured_books': 'Featured Novels',
@@ -132,6 +151,15 @@ class LanguageProvider with ChangeNotifier {
       'chapter': 'Chapter',
       'no_description_available': 'No description available',
       'select_chapter': 'Select chapters',
+
+      // Reader
+      'reader_settings': 'Reading settings',
+      'font_size': 'Font size',
+      'background_color': 'Background color',
+      'text_color': 'Text color',
+      'pick_color': 'Pick a color',
+      'default': 'Default',
+      'done': 'Done',
 
       // Discover
       'discover_subtitle': 'Search, filter and explore new novels',

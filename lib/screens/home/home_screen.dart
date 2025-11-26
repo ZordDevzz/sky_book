@@ -34,10 +34,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final provider = Provider.of<HomeProvider>(context);
 
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          _TopBar(lang: lang),
-          Expanded(
+          Positioned(
+            top: 12,
+            left: 12,
+            right: 12,
+            child: _TopBar(lang: lang),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 92),
             child: RefreshIndicator(
               onRefresh: () => provider.fetchBooks(),
               child: ListView(
@@ -50,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     currentPage: _currentPage,
                     onPageChanged: (i) => setState(() => _currentPage = i),
                   ),
-                  Divider(color: Colors.grey.withAlpha(100), thickness: 1.0),
+                  const _SectionDivider(),
                   _NewReleasesSection(
                     lang: lang,
                     isLoading: provider.isLoading,
@@ -72,40 +78,62 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(12),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.home_outlined),
-              const SizedBox(width: 8.0),
-              Text(
-                lang.t('home'),
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primary.withOpacity(0.14),
+              colorScheme.secondary.withOpacity(0.10),
             ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
-          ),
-        ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(18),
+              spreadRadius: 1,
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.surface,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.home_outlined),
+            ),
+            const SizedBox(width: 10.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  lang.t('home'),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  lang.t('featured_muted'),
+                  style: TextStyle(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -137,8 +165,8 @@ class _FeaturedSection extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            colorScheme.primary.withOpacity(0.12),
-            colorScheme.secondary.withOpacity(0.08),
+            colorScheme.primary.withOpacity(0.14),
+            colorScheme.secondary.withOpacity(0.10),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -213,10 +241,13 @@ class _FeaturedSection extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final book = books[index];
                       final isActive = index == currentPage;
-                      return _FeaturedCard(
-                        book: book,
-                        isActive: isActive,
-                        colorScheme: colorScheme,
+                      return _AnimatedFeaturedCard(
+                        index: index,
+                        child: _FeaturedCard(
+                          book: book,
+                          isActive: isActive,
+                          colorScheme: colorScheme,
+                        ),
                       );
                     },
                   ),
@@ -373,6 +404,29 @@ class _FeaturedCard extends StatelessWidget {
   }
 }
 
+class _AnimatedFeaturedCard extends StatelessWidget {
+  const _AnimatedFeaturedCard({required this.child, required this.index});
+
+  final Widget child;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    final duration = Duration(milliseconds: 260 + 40 * (index % 6));
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: duration,
+      curve: Curves.easeOut,
+      builder: (context, value, _) {
+        return Transform.scale(
+          scale: 0.9 + 0.1 * value,
+          child: Opacity(opacity: value.clamp(0, 1), child: child),
+        );
+      },
+    );
+  }
+}
+
 class _Chip extends StatelessWidget {
   const _Chip({required this.icon, required this.label, required this.color});
 
@@ -427,8 +481,8 @@ class _NewReleasesSection extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            colorScheme.primary.withOpacity(0.08),
-            colorScheme.secondary.withOpacity(0.06),
+            colorScheme.primary.withOpacity(0.12),
+            colorScheme.secondary.withOpacity(0.08),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -535,114 +589,117 @@ class _NewReleasesSection extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 final book = books[index];
-                return InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            BookDetailsScreen(bookId: book.bookId),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      gradient: LinearGradient(
-                        colors: [
-                          colorScheme.surface.withOpacity(0.9),
-                          colorScheme.surface.withOpacity(0.7),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: SizedBox(
-                            width: 72,
-                            height: 96,
-                            child: book.coverImageUrl != null
-                                ? Image.asset(
-                                    "assets/images/thumbnails/${book.coverImageUrl!}",
-                                    fit: BoxFit.cover,
-                                  )
-                                : Container(
-                                    color: colorScheme.surfaceContainerHighest,
-                                    child: const Icon(Icons.book),
-                                  ),
-                          ),
+                return _AnimatedNewItem(
+                  index: index,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              BookDetailsScreen(bookId: book.bookId),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                book.title,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.person,
-                                    size: 14,
-                                    color: Colors.grey,
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        gradient: LinearGradient(
+                          colors: [
+                            colorScheme.surface.withOpacity(0.9),
+                            colorScheme.surface.withOpacity(0.7),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: SizedBox(
+                              width: 72,
+                              height: 96,
+                              child: book.coverImageUrl != null
+                                  ? Image.asset(
+                                      "assets/images/thumbnails/${book.coverImageUrl!}",
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      color:
+                                          colorScheme.surfaceContainerHighest,
+                                      child: const Icon(Icons.book),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  book.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      book.author?.name ?? 'Unknown',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12,
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.person,
+                                      size: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        book.author?.name ?? 'Unknown',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  _NewChip(
-                                    icon: Icons.calendar_month,
-                                    label: book.releaseDate != null
-                                        ? "${book.releaseDate!.day.toString().padLeft(2, '0')}/${book.releaseDate!.month.toString().padLeft(2, '0')}/${book.releaseDate!.year}"
-                                        : 'N/A',
-                                    color: colorScheme.primary,
-                                    background: colorScheme.primary.withOpacity(
-                                      0.12,
-                                    ),
-                                  ),
-                                  if (book.tags.isNotEmpty)
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
                                     _NewChip(
-                                      icon: Icons.label_outline,
-                                      label: book.tags.first.name,
+                                      icon: Icons.calendar_month,
+                                      label: book.releaseDate != null
+                                          ? "${book.releaseDate!.day.toString().padLeft(2, '0')}/${book.releaseDate!.month.toString().padLeft(2, '0')}/${book.releaseDate!.year}"
+                                          : 'N/A',
                                       color: colorScheme.primary,
                                       background: colorScheme.primary
                                           .withOpacity(0.12),
                                     ),
-                                ],
-                              ),
-                            ],
+                                    if (book.tags.isNotEmpty)
+                                      _NewChip(
+                                        icon: Icons.label_outline,
+                                        label: book.tags.first.name,
+                                        color: colorScheme.primary,
+                                        background: colorScheme.primary
+                                            .withOpacity(0.12),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -689,6 +746,53 @@ class _NewChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AnimatedNewItem extends StatelessWidget {
+  const _AnimatedNewItem({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final duration = Duration(milliseconds: 240 + 40 * (index % 6));
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: duration,
+      curve: Curves.easeOut,
+      builder: (context, value, _) {
+        return Transform.translate(
+          offset: Offset(0, 10 * (1 - value)),
+          child: Opacity(opacity: value.clamp(0, 1), child: child),
+        );
+      },
+    );
+  }
+}
+
+class _SectionDivider extends StatelessWidget {
+  const _SectionDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Container(
+        height: 1,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.transparent,
+              colorScheme.outline.withOpacity(0.5),
+              Colors.transparent,
+            ],
+          ),
+        ),
       ),
     );
   }
