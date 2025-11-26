@@ -10,7 +10,6 @@ import 'package:sky_book/repositories/chapter_repository.dart';
 import 'package:sky_book/repositories/tag_repository.dart';
 import 'package:sky_book/screens/reader/reader_provider.dart';
 import 'package:sky_book/services/database_service.dart';
-import 'package:sky_book/services/theme_provider.dart';
 
 class ReaderScreen extends StatelessWidget {
   const ReaderScreen({
@@ -393,50 +392,6 @@ class _SettingsMenu extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ChapterNavigation extends StatelessWidget {
-  final VoidCallback? onPrevious;
-  final VoidCallback? onNext;
-
-  const _ChapterNavigation({required this.onPrevious, required this.onNext});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: onPrevious,
-              icon: const Icon(Icons.arrow_back_ios_new, size: 16),
-              label: const Text('Chương trước'),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: onNext,
-              icon: const Icon(Icons.arrow_forward_ios, size: 16),
-              label: const Text('Chương tiếp'),
-            ),
-          ),
-        ],
       ),
     );
   }

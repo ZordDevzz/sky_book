@@ -21,5 +21,5 @@
 - [ ] Implement i18n to support all languages
 - [ ] Implement shelf logic and design shelf screen
 - [ ] Implement notifications for the bell on home screen
-- [ ] Re-design Login / Register screen for more convenience
+- [x] Re-design Login / Register screen for more convenience
 - [ ] Optimize database and logics
