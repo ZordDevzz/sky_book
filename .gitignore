@@ -44,3 +44,4 @@ app.*.map.json
 /assets/.env
 .zed
 /promt.txt
+/bao_cao.txt
