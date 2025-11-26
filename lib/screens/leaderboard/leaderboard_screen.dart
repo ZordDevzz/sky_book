@@ -49,17 +49,20 @@ class LeaderboardScreen extends StatelessWidget {
                                   final book = provider.entries[index];
                                   final count = switch (provider.range) {
                                     LeaderboardRange.weekly =>
-                                      '${provider.countFor(book)} ${lang.t('views_week')}',
+                                        '${provider.countFor(book)} ${lang.t('views_week')}',
                                     LeaderboardRange.monthly =>
-                                      '${provider.countFor(book)} ${lang.t('views_month')}',
+                                        '${provider.countFor(book)} ${lang.t('views_month')}',
                                     LeaderboardRange.allTime =>
-                                      '${provider.countFor(book)} ${lang.t('views_total')}',
+                                        '${provider.countFor(book)} ${lang.t('views_total')}',
                                   };
-                                  return _EntryCard(
-                                    rank: index + 1,
-                                    book: book,
-                                    countLabel: count,
-                                    colorScheme: colorScheme,
+                                  return _AnimatedEntryCard(
+                                    index: index,
+                                    child: _EntryCard(
+                                      rank: index + 1,
+                                      book: book,
+                                      countLabel: count,
+                                      colorScheme: colorScheme,
+                                    ),
                                   );
                                 },
                               ),
@@ -159,8 +162,8 @@ class _Header extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            colorScheme.primary.withOpacity(0.16),
-            colorScheme.secondary.withOpacity(0.12),
+            colorScheme.primary.withOpacity(0.14),
+            colorScheme.secondary.withOpacity(0.10),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -338,6 +341,32 @@ class _EntryCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AnimatedEntryCard extends StatelessWidget {
+  const _AnimatedEntryCard({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final duration = Duration(milliseconds: 260 + 30 * (index % 6));
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: duration,
+      curve: Curves.easeOut,
+      builder: (context, value, _) {
+        return Transform.translate(
+          offset: Offset(0, 16 * (1 - value)),
+          child: Opacity(
+            opacity: value.clamp(0, 1),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

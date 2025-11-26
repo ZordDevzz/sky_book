@@ -4,35 +4,45 @@ import '../services/database_service.dart';
 
 class ChapterRepository {
   final DatabaseService _dbService;
+  final Map<String, List<Chapter>> _chaptersByBookId = {};
+  final Map<String, Chapter> _chapterCache = {};
 
   ChapterRepository({required DatabaseService dbService})
-    : _dbService = dbService;
+      : _dbService = dbService;
 
   Future<List<Chapter>> getChaptersForBook(String bookId) async {
-    final Connection connection = await _dbService.getConnection();
+    if (_chaptersByBookId.containsKey(bookId)) {
+      return _chaptersByBookId[bookId]!;
+    }
 
-    print("Getting chapters for book $bookId from database...");
+    final Connection connection = await _dbService.getConnection();
     final List<List<dynamic>> results = await connection.execute(
       Sql.named(
-        '''SELECT chapter_id, book_id, title, chapter_index, word_count, publish_date 
+        '''SELECT chapter_id, book_id, title, content, chapter_index, word_count, publish_date 
         FROM chapter 
         WHERE book_id = @book_id
         ORDER BY chapter_index''',
       ),
       parameters: {'book_id': bookId},
     );
-    print('Chapters fetched: ${results.length}');
-    return results.map((row) {
+
+    final chapters = results.map((row) {
       return Chapter(
-        chapterId: row[0].toString(), // Assuming chapter_id is the first column
-        bookId: row[1].toString(), 
+        chapterId: row[0].toString(),
+        bookId: row[1].toString(),
         title: row[2] as String,
-        content: '',
-        chapterIndex: double.parse(row[3].toString()),
-        wordCount: row[4] as int?,
-        publishDate: row[5] != null ? (row[5] as DateTime) : null,
+        content: row[3] as String? ?? '',
+        chapterIndex: double.parse(row[4].toString()),
+        wordCount: row[5] as int?,
+        publishDate: row[6] != null ? (row[6] as DateTime) : null,
       );
     }).toList();
+
+    _chaptersByBookId[bookId] = chapters;
+    for (final c in chapters) {
+      _chapterCache[c.chapterId] = c;
+    }
+    return chapters;
   }
 
   Future<Map<String, int>> getChapterCountsForBooks(List<String> bookIds) async {
@@ -61,28 +71,46 @@ class ChapterRepository {
     if (chapterIds.isEmpty) {
       return {};
     }
+    final cached = <String, Chapter>{};
+    final missing = <String>[];
+    for (final id in chapterIds) {
+      if (_chapterCache.containsKey(id)) {
+        cached[id] = _chapterCache[id]!;
+      } else {
+        missing.add(id);
+      }
+    }
+    if (missing.isEmpty) return cached;
+
     final Connection connection = await _dbService.getConnection();
     final results = await connection.execute(
-      Sql.named('SELECT chapter_id, book_id, title, chapter_index, word_count, publish_date FROM chapter WHERE chapter_id = ANY(@ids)'),
-      parameters: {'ids': chapterIds},
+      Sql.named(
+        'SELECT chapter_id, book_id, title, content, chapter_index, word_count, publish_date FROM chapter WHERE chapter_id = ANY(@ids)',
+      ),
+      parameters: {'ids': missing},
     );
 
-    final chaptersById = <String, Chapter>{};
     for (final row in results) {
-      chaptersById[row[0].toString()] = Chapter(
+      final chapter = Chapter(
         chapterId: row[0].toString(),
         bookId: row[1].toString(),
         title: row[2] as String,
-        content: '',
-        chapterIndex: double.parse(row[3].toString()),
-        wordCount: row[4] as int?,
-        publishDate: row[5] != null ? (row[5] as DateTime) : null,
+        content: row[3] as String? ?? '',
+        chapterIndex: double.parse(row[4].toString()),
+        wordCount: row[5] as int?,
+        publishDate: row[6] != null ? (row[6] as DateTime) : null,
       );
+      _chapterCache[chapter.chapterId] = chapter;
+      cached[chapter.chapterId] = chapter;
     }
-    return chaptersById;
+    return cached;
   }
 
   Future<Chapter?> getChapterContent(String chapterId) async {
+    if (_chapterCache.containsKey(chapterId) &&
+        _chapterCache[chapterId]!.content.isNotEmpty) {
+      return _chapterCache[chapterId];
+    }
     final Connection connection = await _dbService.getConnection();
     final List<List<dynamic>> results = await connection.execute(
       Sql.named('SELECT * FROM chapter WHERE chapter_id = @chapter_id'),
@@ -94,7 +122,7 @@ class ChapterRepository {
     }
 
     final row = results.first;
-    return Chapter(
+    final chapter = Chapter(
       chapterId: row[0].toString(),
       bookId: row[1].toString(),
       title: row[2] as String,
@@ -103,5 +131,7 @@ class ChapterRepository {
       wordCount: row[5] as int?,
       publishDate: row[6] != null ? (row[6] as DateTime) : null,
     );
+    _chapterCache[chapter.chapterId] = chapter;
+    return chapter;
   }
 }

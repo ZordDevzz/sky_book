@@ -33,7 +33,7 @@ class ShelfProvider with ChangeNotifier {
     this._chapterRepository,
   ) {
     _authProvider.addListener(_onAuthStateChanged);
-    // _onAuthStateChanged(); // Removed to prevent double fetch
+    _onAuthStateChanged();
   }
 
   bool _isLoading = false;

@@ -68,7 +68,10 @@ List<SingleChildWidget> providers = [
       Provider.of<BookRepository>(context, listen: false),
       Provider.of<ChapterRepository>(context, listen: false),
     ),
-    update: (context, auth, shelf) => shelf!..update(),
+    update: (context, auth, shelf) {
+      shelf?.update();
+      return shelf!;
+    },
   ),
   ChangeNotifierProxyProvider<BookRepository, HomeProvider>(
     create: (context) =>

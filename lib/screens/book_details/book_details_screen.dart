@@ -276,9 +276,7 @@ class _Body extends StatelessWidget {
                       await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => ReaderScreen(
-                            book: book,
-                            chapters: detailsProvider.chapters,
-                            currentChapter: detailsProvider.chapters.first,
+                            chapterId: detailsProvider.chapters.first.chapterId,
                           ),
                         ),
                       );
@@ -299,9 +297,7 @@ class _Body extends StatelessWidget {
                     await Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => ReaderScreen(
-                          book: book,
-                          chapters: detailsProvider.chapters,
-                          currentChapter: lastReadChapter!,
+                          chapterId: lastReadChapter!.chapterId,
                         ),
                       ),
                     );
