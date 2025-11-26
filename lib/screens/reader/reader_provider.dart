@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sky_book/models/book.dart';
 import 'package:sky_book/models/chapter.dart';
+import 'package:sky_book/models/shelf.dart';
 import 'package:sky_book/repositories/book_repository.dart';
 import 'package:sky_book/repositories/chapter_repository.dart';
+import 'package:sky_book/repositories/shelf_repository.dart';
+import 'package:sky_book/screens/shelf/shelf_provider.dart'; // Import ShelfProvider
+import 'package:sky_book/services/auth_provider.dart';
 
 class ReaderProvider with ChangeNotifier {
   final ChapterRepository _chapterRepository;
   final BookRepository _bookRepository;
+  final ShelfRepository _shelfRepository;
+  final AuthProvider _authProvider;
+  final ShelfProvider _shelfProvider; // Add ShelfProvider
   final bool _defaultDarkMode;
 
   // Preference keys
@@ -19,21 +26,28 @@ class ReaderProvider with ChangeNotifier {
   ReaderProvider(
     this._chapterRepository,
     this._bookRepository,
+    this._shelfRepository,
+    this._authProvider,
+    this._shelfProvider, // Add to constructor
     String initialChapterId, {
     bool defaultDarkMode = false,
-  })  : _defaultDarkMode = defaultDarkMode {
+  }) : _defaultDarkMode = defaultDarkMode {
     _loadInitialChapter(initialChapterId);
     _loadPreferences();
   }
 
   ReaderProvider.fromData(
     this._chapterRepository,
-    this._bookRepository, {
+    this._bookRepository,
+    this._shelfRepository,
+    this._authProvider,
+    this._shelfProvider, // Add to fromData constructor
+    {
     required Book book,
     required List<Chapter> chapters,
     required Chapter currentChapter,
     bool defaultDarkMode = false,
-  })  : _defaultDarkMode = defaultDarkMode {
+  }) : _defaultDarkMode = defaultDarkMode {
     _loadFromData(book, chapters, currentChapter);
     _loadPreferences();
   }
@@ -93,6 +107,7 @@ class ReaderProvider with ChangeNotifier {
     _currentBook = book;
     _bookChapters = chapters;
     _loadChapterById(currentChapter.chapterId);
+    _updateProgress();
   }
 
   Future<void> _loadInitialChapter(String chapterId) async {
@@ -113,7 +128,7 @@ class ReaderProvider with ChangeNotifier {
     final allChapters = await _chapterRepository.getChaptersForBook(bookId);
     _currentBook = book;
     _bookChapters = allChapters;
-
+    _updateProgress();
     _isLoading = false;
     notifyListeners();
   }
@@ -124,6 +139,32 @@ class ReaderProvider with ChangeNotifier {
     _currentChapter = await _chapterRepository.getChapterContent(chapterId);
     _isLoading = false;
     notifyListeners();
+    _updateProgress();
+  }
+
+  Future<void> _updateProgress() async {
+    if (_authProvider.currentUser == null || _currentBook == null) return;
+    
+    // Check from cached ShelfProvider first
+    if (_shelfProvider.isBookOnShelf(_currentBook!.bookId)) {
+      // If book is on shelf, just update progress
+      final shelf = _shelfProvider.getShelvedBookInfo(_currentBook!.bookId)?.shelf;
+      if (shelf != null) {
+        shelf.lastReadChapterId = _currentChapter!.chapterId;
+        shelf.lastReadDate = DateTime.now();
+        await _shelfRepository.updateShelf(shelf);
+      }
+    } else {
+      // If not on shelf, add it
+      final newShelf = Shelf(
+        userId: _authProvider.currentUser!.userId,
+        bookId: _currentBook!.bookId,
+        lastReadChapterId: _currentChapter!.chapterId,
+        lastReadDate: DateTime.now(),
+      );
+      await _shelfRepository.addBookToShelf(newShelf);
+      _shelfProvider.update(); // Notify ShelfProvider of change
+    }
   }
 
   Future<void> goToNextChapter() async {

@@ -2,6 +2,8 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:sky_book/repositories/author_repository.dart';
 import 'package:sky_book/repositories/book_repository.dart';
+import 'package:sky_book/repositories/chapter_repository.dart';
+import 'package:sky_book/repositories/shelf_repository.dart';
 import 'package:sky_book/repositories/tag_repository.dart';
 import 'package:sky_book/repositories/user_repository.dart';
 import 'package:sky_book/services/auth_provider.dart';
@@ -33,15 +35,24 @@ List<SingleChildWidget> providers = [
       dbService: Provider.of<DatabaseService>(context, listen: false),
     ),
   ),
+  Provider<ShelfRepository>(
+    create: (context) => ShelfRepository(
+      Provider.of<DatabaseService>(context, listen: false),
+    ),
+  ),
+  Provider<ChapterRepository>(
+    create: (context) => ChapterRepository(
+      dbService: Provider.of<DatabaseService>(context, listen: false),
+    ),
+  ),
   ChangeNotifierProvider(create: (_) => ThemeProvider()),
   ChangeNotifierProvider(create: (_) => LanguageProvider()),
-  ChangeNotifierProvider(create: (_) => ShelfProvider()),
   ChangeNotifierProxyProvider<UserRepository, AuthProvider>(
     create: (context) => AuthProvider(
       userRepository: Provider.of<UserRepository>(context, listen: false),
     ),
-    update: (_, repo, auth) => (auth ?? AuthProvider(userRepository: repo))
-      ..updateRepository(repo),
+    update: (_, repo, auth) =>
+    (auth ?? AuthProvider(userRepository: repo))..updateRepository(repo),
   ),
   ProxyProvider<DatabaseService, BookRepository>(
     update: (context, dbService, _) => BookRepository(
@@ -49,6 +60,15 @@ List<SingleChildWidget> providers = [
       authorRepository: Provider.of<AuthorRepository>(context, listen: false),
       tagRepository: Provider.of<TagRepository>(context, listen: false),
     ),
+  ),
+  ChangeNotifierProxyProvider<AuthProvider, ShelfProvider>(
+    create: (context) => ShelfProvider(
+      Provider.of<ShelfRepository>(context, listen: false),
+      Provider.of<AuthProvider>(context, listen: false),
+      Provider.of<BookRepository>(context, listen: false),
+      Provider.of<ChapterRepository>(context, listen: false),
+    ),
+    update: (context, auth, shelf) => shelf!..update(),
   ),
   ChangeNotifierProxyProvider<BookRepository, HomeProvider>(
     create: (context) =>
@@ -61,8 +81,8 @@ List<SingleChildWidget> providers = [
     update: (_, __, previous) => previous!,
   ),
   ChangeNotifierProxyProvider<BookRepository, LeaderboardProvider>(
-    create: (context) =>
-        LeaderboardProvider(Provider.of<BookRepository>(context, listen: false)),
+    create: (context) => LeaderboardProvider(
+        Provider.of<BookRepository>(context, listen: false)),
     update: (_, __, previous) => previous!,
   ),
 ];

@@ -28,6 +28,8 @@ class LanguageProvider with ChangeNotifier {
       'no_account': 'Chưa có tài khoản? Đăng ký ngay',
       'has_account': 'Đã có tài khoản? Đăng nhập ngay',
 
+      'shelf_empty': 'Tủ sách của bạn trống',
+
       // Home
       'featured_books': 'Truyện Hot Tuần',
       'featured_muted': 'Top trending trong tuần',
@@ -109,6 +111,8 @@ class LanguageProvider with ChangeNotifier {
       'repeat_passw_validator': 'Passwords do not match',
       'no_account': 'Don\'t have an account? Register now',
       'has_account': 'Has an account already? Login now',
+
+      'shelf_empty': 'Your shelf is empty',
 
       // Home
       'featured_books': 'Featured Novels',

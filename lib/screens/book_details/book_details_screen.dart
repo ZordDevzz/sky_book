@@ -1,13 +1,12 @@
+import 'package:sky_book/models/chapter.dart';
 import 'package:sky_book/screens/reader/reader_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sky_book/models/book.dart';
-import 'package:sky_book/repositories/author_repository.dart';
 import 'package:sky_book/repositories/book_repository.dart';
 import 'package:sky_book/repositories/chapter_repository.dart';
-import 'package:sky_book/repositories/tag_repository.dart';
 import 'package:sky_book/screens/book_details/book_details_provider.dart';
-import 'package:sky_book/services/database_service.dart';
+import 'package:sky_book/screens/shelf/shelf_provider.dart';
 import 'package:sky_book/services/language_provider.dart';
 
 class BookDetailsScreen extends StatelessWidget {
@@ -19,18 +18,8 @@ class BookDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => BookDetailsProvider(
-        BookRepository(
-          dbService: Provider.of<DatabaseService>(context, listen: false),
-          authorRepository: AuthorRepository(
-            dbService: Provider.of<DatabaseService>(context, listen: false),
-          ),
-          tagRepository: TagRepository(
-            dbService: Provider.of<DatabaseService>(context, listen: false),
-          ),
-        ),
-        ChapterRepository(
-          dbService: Provider.of<DatabaseService>(context, listen: false),
-        ),
+        Provider.of<BookRepository>(context, listen: false),
+        Provider.of<ChapterRepository>(context, listen: false),
         bookId,
       ),
       child: const _BookDetailsView(),
@@ -45,12 +34,13 @@ class _BookDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
     final colorScheme = Theme.of(context).colorScheme;
-    return Consumer<BookDetailsProvider>(
-      builder: (context, provider, _) {
+
+    return Consumer2<BookDetailsProvider, ShelfProvider>(
+      builder: (context, detailsProvider, shelfProvider, _) {
         return Scaffold(
           body: Stack(
             children: [
-              if (provider.book?.coverImageUrl != null)
+              if (detailsProvider.book?.coverImageUrl != null)
                 Positioned(
                   top: 0,
                   left: 0,
@@ -58,7 +48,7 @@ class _BookDetailsView extends StatelessWidget {
                   child: Opacity(
                     opacity: 0.25,
                     child: Image.asset(
-                      "assets/images/thumbnails/${provider.book!.coverImageUrl!}",
+                      "assets/images/thumbnails/${detailsProvider.book!.coverImageUrl!}",
                       fit: BoxFit.cover,
                       height: 260,
                     ),
@@ -80,11 +70,16 @@ class _BookDetailsView extends StatelessWidget {
                 children: [
                   _Header(lang: lang),
                   Expanded(
-                    child: provider.isLoading
+                    child: detailsProvider.isLoading
                         ? const Center(child: CircularProgressIndicator())
-                        : provider.book == null
-                        ? Center(child: Text(lang.t('book_not_found')))
-                        : _Body(book: provider.book!, lang: lang),
+                        : detailsProvider.book == null
+                            ? Center(child: Text(lang.t('book_not_found')))
+                            : _Body(
+                                book: detailsProvider.book!,
+                                lang: lang,
+                                detailsProvider: detailsProvider,
+                                shelfProvider: shelfProvider,
+                              ),
                   ),
                 ],
               ),
@@ -135,15 +130,33 @@ class _Header extends StatelessWidget {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.book, required this.lang});
+  const _Body({
+    required this.book,
+    required this.lang,
+    required this.detailsProvider,
+    required this.shelfProvider,
+  });
 
   final Book book;
   final LanguageProvider lang;
+  final BookDetailsProvider detailsProvider;
+  final ShelfProvider shelfProvider;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final provider = Provider.of<BookDetailsProvider>(context, listen: false);
+    final isBookOnShelf = shelfProvider.isBookOnShelf(book.bookId);
+    final shelvedBookInfo = shelfProvider.getShelvedBookInfo(book.bookId);
+    Chapter? lastReadChapter;
+    if (shelvedBookInfo?.lastReadChapterIndex != null && detailsProvider.chapters.isNotEmpty) {
+      try {
+        lastReadChapter = detailsProvider.chapters.firstWhere((c) => c.chapterIndex == shelvedBookInfo!.lastReadChapterIndex);
+      } catch(e) {
+        lastReadChapter = null;
+      }
+    }
+
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
@@ -239,29 +252,37 @@ class _Body extends StatelessWidget {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(lang.t('add_to_shelf'))),
-                      );
-                    },
-                    icon: const Icon(Icons.library_add_outlined),
-                    label: Text(lang.t('add_to_shelf')),
+                    onPressed: isBookOnShelf
+                        ? null
+                        : () async {
+                            await shelfProvider.addBookToShelf(book.bookId);
+                            // No need to refresh, ShelfProvider will notify listeners
+                          },
+                    icon: isBookOnShelf
+                        ? const Icon(Icons.check)
+                        : const Icon(Icons.library_add_outlined),
+                    label: Text(
+                      isBookOnShelf
+                          ? lang.t('added_to_shelf')
+                          : lang.t('add_to_shelf'),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      if (provider.chapters.isEmpty) return;
-                      Navigator.of(context).push(
+                    onPressed: () async {
+                      if (detailsProvider.chapters.isEmpty) return;
+                      await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => ReaderScreen(
                             book: book,
-                            chapters: provider.chapters,
-                            currentChapter: provider.chapters.first,
+                            chapters: detailsProvider.chapters,
+                            currentChapter: detailsProvider.chapters.first,
                           ),
                         ),
                       );
+                      shelfProvider.update();
                     },
                     icon: const Icon(Icons.play_circle_outline),
                     label: Text(lang.t('read_from_first')),
@@ -269,6 +290,44 @@ class _Body extends StatelessWidget {
                 ),
               ],
             ),
+            if (shelvedBookInfo?.lastReadChapterIndex != null) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ReaderScreen(
+                          book: book,
+                          chapters: detailsProvider.chapters,
+                          currentChapter: lastReadChapter!,
+                        ),
+                      ),
+                    );
+                    shelfProvider.update();
+                  },
+                  icon: const Icon(Icons.play_arrow),
+                  label: Text(
+                    '${lang.t('continue_reading')} ${lastReadChapter!.title}',
+                  ),
+                ),
+              ),
+            ],
+            if (isBookOnShelf) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    await shelfProvider.removeBookFromShelf(book.bookId);
+                    shelfProvider.update();
+                  },
+                  icon: const Icon(Icons.bookmark_remove),
+                  label: Text(lang.t('remove_from_shelf')),
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
             Text(
               lang.t('description'),

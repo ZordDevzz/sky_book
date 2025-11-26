@@ -3,8 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sky_book/screens/auth/auth_screen.dart';
+import 'package:sky_book/screens/book_details/book_details_screen.dart';
+import 'package:sky_book/screens/shelf/shelf_provider.dart';
 import 'package:sky_book/services/auth_provider.dart';
 import 'package:sky_book/services/language_provider.dart';
+import 'package:sky_book/widgets/book_thumbnail.dart';
 
 class ShelfScreen extends StatelessWidget {
   const ShelfScreen({super.key});
@@ -15,19 +18,85 @@ class ShelfScreen extends StatelessWidget {
     final lang = Provider.of<LanguageProvider>(context);
 
     return Scaffold(
+      appBar: AppBar(title: Text(lang.t('shelf'))),
       body: Stack(
         children: [
-          const Center(
-            child: Text('Shelf Screen'),
+          Consumer<ShelfProvider>(
+            builder: (context, shelfProvider, child) {
+              if (shelfProvider.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (shelfProvider.shelvedBooksInfo.isEmpty) {
+                return Center(child: Text(lang.t('shelf_empty')));
+              }
+
+              return GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.6,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
+                itemCount: shelfProvider.shelvedBooksInfo.length,
+                itemBuilder: (context, index) {
+                  final shelvedBookInfo = shelfProvider.shelvedBooksInfo[index];
+                  final book = shelvedBookInfo.book;
+                  final shelf = shelvedBookInfo.shelf;
+                  final totalChapters = shelvedBookInfo.totalChapters;
+                  final lastReadChapterIndex =
+                      shelvedBookInfo.lastReadChapterIndex;
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => BookDetailsScreen(bookId: book.bookId),
+                        ),
+                      );
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: BookThumbnail(
+                            book: book,
+                            shelf: shelf,
+                            totalChapters: totalChapters,
+                            lastReadChapterIndex: lastReadChapterIndex,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          book.title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          book.author?.name.isNotEmpty == true
+                              ? book.author!.name
+                              : lang.t('unknown_author'),
+                          style: Theme.of(context).textTheme.bodySmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
           ),
           if (auth.isGuest)
             _GuestLockOverlay(
               message: lang.t('login_required'),
               actionLabel: lang.t('login_or_register'),
               onAction: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AuthScreen()),
-                );
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const AuthScreen()));
               },
             ),
         ],

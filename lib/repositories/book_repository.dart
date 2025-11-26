@@ -102,6 +102,52 @@ class BookRepository {
     return book;
   }
 
+  Future<Map<String, Book>> getBooksByIds(List<String> ids) async {
+    if (ids.isEmpty) {
+      return {};
+    }
+    final Connection connection = await _dbService.getConnection();
+    final results = await connection.execute(
+      Sql.named('SELECT * FROM book WHERE book_id = ANY(@ids)'),
+      parameters: {'ids': ids},
+    );
+
+    if (results.isEmpty) {
+      return {};
+    }
+
+    List<Book> books = [];
+    for (var row in results) {
+      final book = Book(
+        bookId: row[0].toString(),
+        title: row[1] as String,
+        authorId: row[2].toString(),
+        description: row[3] as String?,
+        coverImageUrl: row[4] as String?,
+        releaseDate: row[5] != null ? (row[5] as DateTime) : null,
+        status: row[6] as String?,
+        rating: double.tryParse(row[7]?.toString() ?? ''),
+        viewCountTotal: row[8] as int,
+        viewCountMonthly: row[9] as int,
+        viewCountWeekly: row[10] as int,
+      );
+      books.add(book);
+    }
+
+    final authorIds = books.map((b) => b.authorId).toSet().toList();
+    final authorsById = await _authorRepository.getAuthorsByIds(authorIds);
+    final tagsByBookId = await _tagRepository.getTagsForBooks(ids);
+
+    final booksById = <String, Book>{};
+    for (final book in books) {
+      book.author = authorsById[book.authorId];
+      book.tags = tagsByBookId[book.bookId] ?? [];
+      booksById[book.bookId] = book;
+    }
+
+    return booksById;
+  }
+
   Future<void> addBook(Book book) async {
     final Connection connection = await _dbService.getConnection();
     await connection.execute(

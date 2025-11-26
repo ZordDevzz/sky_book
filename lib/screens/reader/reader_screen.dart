@@ -4,12 +4,12 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:sky_book/models/book.dart';
 import 'package:sky_book/models/chapter.dart';
-import 'package:sky_book/repositories/author_repository.dart';
 import 'package:sky_book/repositories/book_repository.dart';
 import 'package:sky_book/repositories/chapter_repository.dart';
-import 'package:sky_book/repositories/tag_repository.dart';
+import 'package:sky_book/repositories/shelf_repository.dart';
 import 'package:sky_book/screens/reader/reader_provider.dart';
-import 'package:sky_book/services/database_service.dart';
+import 'package:sky_book/screens/shelf/shelf_provider.dart'; // Import ShelfProvider
+import 'package:sky_book/services/auth_provider.dart';
 
 class ReaderScreen extends StatelessWidget {
   const ReaderScreen({
@@ -19,9 +19,9 @@ class ReaderScreen extends StatelessWidget {
     this.chapters,
     this.currentChapter,
   }) : assert(
-         chapterId != null ||
-             (book != null && chapters != null && currentChapter != null),
-       );
+          chapterId != null ||
+              (book != null && chapters != null && currentChapter != null),
+        );
 
   final String? chapterId;
   final Book? book;
@@ -30,23 +30,26 @@ class ReaderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dbService = Provider.of<DatabaseService>(context, listen: false);
-    final chapterRepository = ChapterRepository(dbService: dbService);
-    final bookRepository = BookRepository(
-      dbService: dbService,
-      authorRepository: AuthorRepository(dbService: dbService),
-      tagRepository: TagRepository(dbService: dbService),
-    );
-    final defaultDarkMode = Theme.of(context).brightness == Brightness.dark
-        ? true
-        : false;
+    final defaultDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return ChangeNotifierProvider(
       create: (context) {
+        final chapterRepository =
+            Provider.of<ChapterRepository>(context, listen: false);
+        final bookRepository =
+            Provider.of<BookRepository>(context, listen: false);
+        final shelfRepository =
+            Provider.of<ShelfRepository>(context, listen: false);
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final shelfProvider = Provider.of<ShelfProvider>(context, listen: false); // Get ShelfProvider
+
         if (book != null && chapters != null && currentChapter != null) {
           return ReaderProvider.fromData(
             chapterRepository,
             bookRepository,
+            shelfRepository,
+            authProvider,
+            shelfProvider, // Pass ShelfProvider
             book: book!,
             chapters: chapters!,
             currentChapter: currentChapter!,
@@ -56,6 +59,9 @@ class ReaderScreen extends StatelessWidget {
         return ReaderProvider(
           chapterRepository,
           bookRepository,
+          shelfRepository,
+          authProvider,
+          shelfProvider, // Pass ShelfProvider
           chapterId!,
           defaultDarkMode: defaultDarkMode,
         );
