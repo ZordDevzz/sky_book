@@ -143,6 +143,7 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final provider = Provider.of<BookDetailsProvider>(context, listen: false);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
@@ -238,7 +239,11 @@ class _Body extends StatelessWidget {
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(lang.t('add_to_shelf'))),
+                      );
+                    },
                     icon: const Icon(Icons.library_add_outlined),
                     label: Text(lang.t('add_to_shelf')),
                   ),
@@ -246,7 +251,18 @@ class _Body extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      if (provider.chapters.isEmpty) return;
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ReaderScreen(
+                            book: book,
+                            chapters: provider.chapters,
+                            currentChapter: provider.chapters.first,
+                          ),
+                        ),
+                      );
+                    },
                     icon: const Icon(Icons.play_circle_outline),
                     label: Text(lang.t('read_from_first')),
                   ),
@@ -282,75 +298,10 @@ class _Body extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            _ChapterHeader(lang: lang),
-            const SizedBox(height: 8),
             _ChaptersList(),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _ChapterHeader extends StatelessWidget {
-  const _ChapterHeader({required this.lang});
-  final LanguageProvider lang;
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = Provider.of<BookDetailsProvider>(context, listen: false);
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              lang.t('chapters'),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(width: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '${provider.chapters.length} ${lang.t('chapter')}',
-                style: TextStyle(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        DropdownButtonFormField<int>(
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 10,
-            ),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          hint: Text(lang.t('select_chapter')),
-          items: provider.chapters
-              .asMap()
-              .entries
-              .map(
-                (e) => DropdownMenuItem<int>(
-                  value: e.key,
-                  child: Text('${lang.t('chapter')} ${e.key + 1}'),
-                ),
-              )
-              .toList(),
-          onChanged: (idx) {
-            // TODO: jump to selected chapter / open reader
-          },
-        ),
-      ],
     );
   }
 }
@@ -385,11 +336,10 @@ class _ChaptersList extends StatelessWidget {
         return InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            Navigator.push(
-              context,
+            Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => ReaderScreen(
-                  book: provider.book,
+                builder: (_) => ReaderScreen(
+                  book: provider.book!,
                   chapters: provider.chapters,
                   currentChapter: chapter,
                 ),

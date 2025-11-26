@@ -82,6 +82,11 @@ class LanguageProvider with ChangeNotifier {
           'Bạn đang ở chế độ khách. Hãy đăng nhập để lưu truyện và xem BXH.',
       'login_or_register': 'Đăng nhập / Đăng ký',
       'login_required': 'Vui lòng đăng nhập để sử dụng tính năng này',
+      'change_password': 'Đổi mật khẩu',
+      'current_password': 'Mật khẩu hiện tại',
+      'new_password': 'Mật khẩu mới',
+      'confirm_password': 'Nhập lại mật khẩu mới',
+      'password_changed': 'Đã đổi mật khẩu thành công',
     },
     'en': {
       // Navigation
@@ -158,6 +163,11 @@ class LanguageProvider with ChangeNotifier {
           'You are in guest mode. Sign in to save your novels and view leaderboard.',
       'login_or_register': 'Sign in / Register',
       'login_required': 'Please sign in to use this feature',
+      'change_password': 'Change password',
+      'current_password': 'Current password',
+      'new_password': 'New password',
+      'confirm_password': 'Confirm new password',
+      'password_changed': 'Password updated successfully',
     },
   };
 

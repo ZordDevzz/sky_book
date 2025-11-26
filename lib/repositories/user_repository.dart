@@ -142,4 +142,40 @@ class UserRepository {
     final bytes = utf8.encode(password);
     return sha256.convert(bytes).toString();
   }
+
+  Future<User> changePassword({
+    required String userId,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = await getUserById(userId);
+    if (user == null) throw Exception('Không tìm thấy người dùng');
+
+    final currentHash = _hashPassword(currentPassword);
+    if (currentHash != user.passwdHash) {
+      throw Exception('Mật khẩu hiện tại không đúng');
+    }
+
+    final Connection connection = await _dbService.getConnection();
+    final results = await connection.execute(
+      Sql.named(
+        '''
+        UPDATE users
+        SET passwd_hash = @passwd_hash
+        WHERE user_id = @user_id
+        RETURNING user_id, username, passwd_hash, pfp_url, created_at
+        ''',
+      ),
+      parameters: {
+        'user_id': userId,
+        'passwd_hash': _hashPassword(newPassword),
+      },
+    );
+
+    if (results.isEmpty) {
+      throw Exception('Không thể đổi mật khẩu');
+    }
+
+    return _mapRowToUser(results.first);
+  }
 }

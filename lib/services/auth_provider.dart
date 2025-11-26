@@ -82,6 +82,28 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (_currentUser == null) return;
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      _currentUser = await _userRepository.changePassword(
+        userId: _currentUser!.userId,
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+    } catch (e) {
+      _errorMessage = _cleanMessage(e);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> _restoreSession() async {
     final prefs = await SharedPreferences.getInstance();
     final savedUserId = prefs.getString(_sessionKey);

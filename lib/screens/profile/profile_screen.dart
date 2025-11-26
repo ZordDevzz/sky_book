@@ -66,6 +66,14 @@ class ProfileScreen extends StatelessWidget {
                   : () => _showEditDialog(context, auth, lang),
             ),
             const SizedBox(height: 12),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.lock_reset),
+              label: Text(lang.t('change_password')),
+              onPressed: user == null
+                  ? null
+                  : () => _showChangePasswordDialog(context, auth, lang),
+            ),
+            const SizedBox(height: 12),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.settings),
@@ -168,6 +176,88 @@ class ProfileScreen extends StatelessWidget {
                   return;
                 }
                 if (ctx.mounted) Navigator.of(ctx).pop();
+              },
+              child: Text(lang.t('save')),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showChangePasswordDialog(
+    BuildContext context,
+    AuthProvider auth,
+    dynamic lang,
+  ) {
+    final currentController = TextEditingController();
+    final newController = TextEditingController();
+    final confirmController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(lang.t('change_password')),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: currentController,
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: lang.t('current_password')),
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? lang.t('current_password') : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: newController,
+                  obscureText: true,
+                  decoration: InputDecoration(labelText: lang.t('new_password')),
+                  validator: (v) {
+                    if (v == null || v.length < 6) return lang.t('passw_validator');
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: confirmController,
+                  obscureText: true,
+                  decoration:
+                      InputDecoration(labelText: lang.t('confirm_password')),
+                  validator: (v) =>
+                      v != newController.text ? lang.t('repeat_passw_validator') : null,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(lang.t('cancel')),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+                await auth.changePassword(
+                  currentPassword: currentController.text,
+                  newPassword: newController.text,
+                );
+                if (auth.errorMessage != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(auth.errorMessage!)),
+                  );
+                  return;
+                }
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(lang.t('password_changed'))),
+                  );
+                  Navigator.of(ctx).pop();
+                }
               },
               child: Text(lang.t('save')),
             ),

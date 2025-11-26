@@ -8,17 +8,20 @@ import 'package:sky_book/repositories/chapter_repository.dart';
 class ReaderProvider with ChangeNotifier {
   final ChapterRepository _chapterRepository;
   final BookRepository _bookRepository;
+  final bool _defaultDarkMode;
 
   // Preference keys
   static const String _fontSizeKey = 'reader_font_size';
   static const String _backgroundColorKey = 'reader_bg_color';
   static const String _textColorKey = 'reader_text_color';
+  static const String _readerDarkKey = 'reader_dark_mode';
 
   ReaderProvider(
     this._chapterRepository,
     this._bookRepository,
-    String initialChapterId,
-  ) {
+    String initialChapterId, {
+    bool defaultDarkMode = false,
+  })  : _defaultDarkMode = defaultDarkMode {
     _loadInitialChapter(initialChapterId);
     _loadPreferences();
   }
@@ -29,7 +32,8 @@ class ReaderProvider with ChangeNotifier {
     required Book book,
     required List<Chapter> chapters,
     required Chapter currentChapter,
-  }) {
+    bool defaultDarkMode = false,
+  })  : _defaultDarkMode = defaultDarkMode {
     _loadFromData(book, chapters, currentChapter);
     _loadPreferences();
   }
@@ -43,6 +47,7 @@ class ReaderProvider with ChangeNotifier {
   double _fontSize = 16.0;
   Color? _backgroundColor;
   Color? _textColor;
+  bool _readerDarkMode = false;
 
   // Getters
   bool get isLoading => _isLoading;
@@ -51,6 +56,7 @@ class ReaderProvider with ChangeNotifier {
   double get fontSize => _fontSize;
   Color? get backgroundColor => _backgroundColor;
   Color? get textColor => _textColor;
+  bool get readerDarkMode => _readerDarkMode;
 
   bool get isFirstChapter =>
       _bookChapters.isNotEmpty &&
@@ -71,6 +77,12 @@ class ReaderProvider with ChangeNotifier {
     final textColorValue = prefs.getInt(_textColorKey);
     if (textColorValue != null) {
       _textColor = Color(textColorValue);
+    }
+
+    _readerDarkMode = prefs.getBool(_readerDarkKey) ?? _defaultDarkMode;
+    if (_readerDarkMode) {
+      _backgroundColor ??= const Color(0xFF0F141A);
+      _textColor ??= Colors.white;
     }
     notifyListeners();
   }
@@ -172,5 +184,23 @@ class ReaderProvider with ChangeNotifier {
     await _updateAndSave(_textColorKey, color?.value, () {
       _textColor = color;
     });
+  }
+
+  Future<void> toggleReaderDarkMode(bool isDark) async {
+    _readerDarkMode = isDark;
+    if (isDark) {
+      _backgroundColor ??= const Color(0xFF0F141A);
+      _textColor ??= Colors.white;
+    } else {
+      _backgroundColor = null;
+      _textColor = null;
+    }
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_readerDarkKey, _readerDarkMode);
+    if (!isDark) {
+      prefs.remove(_backgroundColorKey);
+      prefs.remove(_textColorKey);
+    }
   }
 }

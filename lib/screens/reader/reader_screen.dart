@@ -19,8 +19,10 @@ class ReaderScreen extends StatelessWidget {
     this.book,
     this.chapters,
     this.currentChapter,
-  }) : assert(chapterId != null ||
-            (book != null && chapters != null && currentChapter != null));
+  }) : assert(
+         chapterId != null ||
+             (book != null && chapters != null && currentChapter != null),
+       );
 
   final String? chapterId;
   final Book? book;
@@ -36,6 +38,9 @@ class ReaderScreen extends StatelessWidget {
       authorRepository: AuthorRepository(dbService: dbService),
       tagRepository: TagRepository(dbService: dbService),
     );
+    final defaultDarkMode = Theme.of(context).brightness == Brightness.dark
+        ? true
+        : false;
 
     return ChangeNotifierProvider(
       create: (context) {
@@ -46,12 +51,14 @@ class ReaderScreen extends StatelessWidget {
             book: book!,
             chapters: chapters!,
             currentChapter: currentChapter!,
+            defaultDarkMode: defaultDarkMode,
           );
         }
         return ReaderProvider(
           chapterRepository,
           bookRepository,
           chapterId!,
+          defaultDarkMode: defaultDarkMode,
         );
       },
       child: const _ReaderView(),
@@ -70,6 +77,8 @@ class _ReaderViewState extends State<_ReaderView> {
   final ScrollController _scrollController = ScrollController();
   bool _isFabVisible = true;
   bool _isNavBarVisible = false;
+  bool _showControlsOverlay = true;
+  bool _settingsOpen = false;
 
   @override
   void initState() {
@@ -80,6 +89,9 @@ class _ReaderViewState extends State<_ReaderView> {
       if (!provider.isLoading && _scrollController.hasClients) {
         _scrollController.jumpTo(0);
       }
+    });
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _showControlsOverlay = false);
     });
   }
 
@@ -108,6 +120,12 @@ class _ReaderViewState extends State<_ReaderView> {
   }
 
   void _showSettingsMenu(BuildContext context, ReaderProvider readerProvider) {
+    setState(() {
+      _settingsOpen = true;
+      _showControlsOverlay = false;
+      _isFabVisible = false;
+      _isNavBarVisible = false;
+    });
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -116,100 +134,135 @@ class _ReaderViewState extends State<_ReaderView> {
         value: readerProvider,
         child: const _SettingsMenu(),
       ),
-    );
+    ).whenComplete(() {
+      if (mounted) {
+        setState(() {
+          _settingsOpen = false;
+          _showControlsOverlay = true;
+          _isFabVisible = true;
+          _isNavBarVisible = true;
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ReaderProvider>(context);
-
-    return Selector<ThemeProvider, ThemeMode>(
-      selector: (_, themeProvider) => themeProvider.themeMode,
-      builder: (context, themeMode, _) {
-        final colorScheme = Theme.of(context).colorScheme;
-        return Scaffold(
-          backgroundColor: provider.backgroundColor ?? colorScheme.surface,
-          body: provider.isLoading && provider.currentChapter == null
-              ? const Center(child: CircularProgressIndicator())
-              : CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
-                    SliverAppBar(
-                      title: Text(
-                        provider.currentBook?.title ?? 'Loading...',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      bottom: PreferredSize(
-                        preferredSize: const Size.fromHeight(20),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Text(
-                            provider.currentChapter?.title ?? '',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: (provider.textColor ??
-                                      Theme.of(context).colorScheme.onSurface)
-                                  .withOpacity(0.7),
+    final colorScheme = Theme.of(context).colorScheme;
+    final bgColor = provider.readerDarkMode
+        ? (provider.backgroundColor ?? const Color(0xFF0F141A))
+        : (provider.backgroundColor ?? colorScheme.surface);
+    final textColor = provider.readerDarkMode
+        ? (provider.textColor ?? Colors.white)
+        : (provider.textColor ?? colorScheme.onSurface);
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: provider.isLoading && provider.currentChapter == null
+          ? const Center(child: CircularProgressIndicator())
+          : GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => setState(() {
+                _showControlsOverlay = !_showControlsOverlay;
+                _isFabVisible = _showControlsOverlay;
+                _isNavBarVisible = _showControlsOverlay;
+              }),
+              child: Stack(
+                children: [
+                  CustomScrollView(
+                    controller: _scrollController,
+                    slivers: [
+                      SliverAppBar(
+                        title: Text(
+                          provider.currentBook?.title ?? 'Loading...',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        bottom: PreferredSize(
+                          preferredSize: const Size.fromHeight(40),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: 12,
+                              left: 16,
+                              right: 16,
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                provider.currentChapter?.title ?? '',
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: textColor.withOpacity(0.7),
+                                ),
+                              ),
                             ),
                           ),
                         ),
+                        backgroundColor: bgColor.withOpacity(0.94),
+                        pinned: true,
+                        floating: true,
                       ),
-                      backgroundColor: (provider.backgroundColor ??
-                              Theme.of(context).colorScheme.surface)
-                          .withOpacity(0.9),
-                      pinned: true,
-                      floating: true,
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 18, 16, 140),
+                          child: provider.isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : Selector<ReaderProvider, double>(
+                                  selector: (_, readerProvider) =>
+                                      readerProvider.fontSize,
+                                  builder: (context, fontSize, __) {
+                                    return Text(
+                                      provider.currentChapter?.content ??
+                                          'Chapter content not found.',
+                                      style: TextStyle(
+                                        fontSize: fontSize,
+                                        height: 1.75,
+                                        color: textColor,
+                                      ),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_showControlsOverlay && !_settingsOpen) ...[
+                    Positioned(
+                      bottom: 24,
+                      right: 16,
+                      child: FloatingActionButton(
+                        onPressed: () => _showSettingsMenu(context, provider),
+                        child: const Icon(Icons.settings),
+                      ),
                     ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                            16, 16, 16, 120), // Padding at bottom
-                        child: provider.isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : Selector<ReaderProvider, double>(
-                                selector: (_, readerProvider) =>
-                                    readerProvider.fontSize,
-                                builder: (context, fontSize, __) {
-                                  return Text(
-                                    provider.currentChapter?.content ??
-                                        'Chapter content not found.',
-                                    style: TextStyle(
-                                      fontSize: fontSize,
-                                      height: 1.6,
-                                      color: provider.textColor ??
-                                          Theme.of(context)
-                                              .colorScheme
-                                              .onSurface,
-                                    ),
-                                  );
-                                },
-                              ),
+                    Positioned(
+                      bottom: 24,
+                      left: 16,
+                      child: Row(
+                        children: [
+                          _CircleNavButton(
+                            icon: Icons.arrow_back_ios_new,
+                            onTap: provider.isFirstChapter
+                                ? null
+                                : provider.goToPreviousChapter,
+                          ),
+                          const SizedBox(width: 10),
+                          _CircleNavButton(
+                            icon: Icons.arrow_forward_ios,
+                            onTap: provider.isLastChapter
+                                ? null
+                                : provider.goToNextChapter,
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                ),
-          floatingActionButton: AnimatedOpacity(
-            opacity: _isFabVisible ? 1.0 : 0.2,
-            duration: const Duration(milliseconds: 250),
-            child: FloatingActionButton(
-              onPressed: () => _showSettingsMenu(context, provider),
-              child: const Icon(Icons.settings),
+                ],
+              ),
             ),
-          ),
-          bottomNavigationBar: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: _isNavBarVisible || _isFabVisible ? 80 : 0,
-            child: _ChapterNavigation(
-              onNext: provider.isLastChapter ? null : provider.goToNextChapter,
-              onPrevious: provider.isFirstChapter
-                  ? null
-                  : provider.goToPreviousChapter,
-            ),
-          ),
-        );
-      },
     );
   }
 }
@@ -256,7 +309,6 @@ class _SettingsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final readerProvider = Provider.of<ReaderProvider>(context);
-    final themeProvider = Provider.of<ThemeProvider>(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -265,73 +317,80 @@ class _SettingsMenu extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Settings',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            // Font Size
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Font Size'),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove),
-                      onPressed: readerProvider.decreaseFontSize,
-                    ),
-                    Text(readerProvider.fontSize.toStringAsFixed(0)),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: readerProvider.increaseFontSize,
-                    ),
-                  ],
+                const Text(
+                  'Tùy chỉnh',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
-            const Divider(),
-            // Background Color
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.format_color_fill),
-              title: const Text('Background Color'),
-              trailing: const Icon(Icons.chevron_right),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Cỡ chữ'),
+                  Row(
+                    children: [
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(Icons.remove),
+                        onPressed: readerProvider.decreaseFontSize,
+                      ),
+                      Text(readerProvider.fontSize.toStringAsFixed(0)),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: const Icon(Icons.add),
+                        onPressed: readerProvider.increaseFontSize,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            _SettingTile(
+              icon: Icons.format_color_fill,
+              title: 'Màu nền',
               onTap: () => _showColorPicker(
                 context,
-                readerProvider.backgroundColor ?? colorScheme.surface,
+                readerProvider.backgroundColor ??
+                    (readerProvider.readerDarkMode
+                        ? const Color(0xFF0F141A)
+                        : colorScheme.surface),
                 readerProvider.changeBackgroundColor,
                 onDefault: () => readerProvider.changeBackgroundColor(null),
               ),
             ),
-            // Text Color
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.format_color_text),
-              title: const Text('Text Color'),
-              trailing: const Icon(Icons.chevron_right),
+            _SettingTile(
+              icon: Icons.format_color_text,
+              title: 'Màu chữ',
               onTap: () => _showColorPicker(
                 context,
-                readerProvider.textColor ?? colorScheme.onSurface,
+                readerProvider.textColor ??
+                    (readerProvider.readerDarkMode
+                        ? Colors.white
+                        : colorScheme.onSurface),
                 readerProvider.changeTextColor,
                 onDefault: () => readerProvider.changeTextColor(null),
               ),
             ),
-            const Divider(),
-            // Dark Mode
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Dark Mode'),
-              value: themeProvider.themeMode == ThemeMode.dark,
-              onChanged: (_) =>
-                  Provider.of<ThemeProvider>(context, listen: false)
-                      .toggleTheme(),
-              secondary: const Icon(Icons.dark_mode_outlined),
-            ),
-            const SizedBox(height: 10),
           ],
         ),
       ),
@@ -347,21 +406,84 @@ class _ChapterNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomAppBar(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          TextButton.icon(
-            onPressed: onPrevious,
-            icon: const Icon(Icons.arrow_back_ios),
-            label: const Text('Previous'),
-          ),
-          TextButton.icon(
-            onPressed: onNext,
-            icon: const Icon(Icons.arrow_forward_ios),
-            label: const Text('Next'),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
           ),
         ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: onPrevious,
+              icon: const Icon(Icons.arrow_back_ios_new, size: 16),
+              label: const Text('Chương trước'),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: onNext,
+              icon: const Icon(Icons.arrow_forward_ios, size: 16),
+              label: const Text('Chương tiếp'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingTile extends StatelessWidget {
+  const _SettingTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon),
+      title: Text(title),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
+    );
+  }
+}
+
+class _CircleNavButton extends StatelessWidget {
+  const _CircleNavButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: colorScheme.surface,
+      shape: const CircleBorder(),
+      elevation: 4,
+      child: IconButton(
+        onPressed: onTap,
+        icon: Icon(icon, size: 18),
+        color: colorScheme.onSurface,
+        padding: const EdgeInsets.all(12),
+        constraints: const BoxConstraints(),
       ),
     );
   }
